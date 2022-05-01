@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { SystemConfigService } from './system-config.service';
 import { CreateSystemConfigDto } from './dto/create-system-config.dto';
 import { UpdateSystemConfigDto } from './dto/update-system-config.dto';
@@ -7,14 +15,9 @@ import { UpdateSystemConfigDto } from './dto/update-system-config.dto';
 export class SystemConfigController {
   constructor(private readonly systemConfigService: SystemConfigService) {}
 
-  @Post()
-  create(@Body() createSystemConfigDto: CreateSystemConfigDto) {
-    return this.systemConfigService.create(createSystemConfigDto);
-  }
-
   @Get()
-  findAll() {
-    return this.systemConfigService.findAll();
+  getConfig() {
+    return this.systemConfigService.getConfig();
   }
 
   @Get(':id')
@@ -23,7 +26,10 @@ export class SystemConfigController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSystemConfigDto: UpdateSystemConfigDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSystemConfigDto: UpdateSystemConfigDto,
+  ) {
     return this.systemConfigService.update(+id, updateSystemConfigDto);
   }
 

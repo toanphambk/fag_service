@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSystemConfigDto } from './dto/create-system-config.dto';
 import { UpdateSystemConfigDto } from './dto/update-system-config.dto';
-
+import * as config from '../config.json';
 @Injectable()
 export class SystemConfigService {
   create(createSystemConfigDto: CreateSystemConfigDto) {
     return 'This action adds a new systemConfig';
   }
 
-  findAll() {
-    return `This action returns all systemConfig`;
+  async getConfig() {
+    return JSON.stringify(config, undefined, 2);
   }
 
   findOne(id: number) {
