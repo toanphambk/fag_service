@@ -20,6 +20,6 @@ export class SystemInfoController {
   }
   @Post('stopTest')
   stopTest() {
-    return this.systemInfoService.startTest();
+    return this.systemInfoService.stopTest();
   }
 }
