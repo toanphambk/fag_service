@@ -16,7 +16,8 @@ export class SystemInfoService {
       this.onError(err);
     });
   }
-  private test;
+  private test = [];
+
   public systemInfo: SystemInfo = {
     ipcInfo: serverState.INIT,
     serverInfo: serverState.INIT,
@@ -51,11 +52,11 @@ export class SystemInfoService {
   public startTest = () => {
     let _index = 0;
     let time = 0;
-    this.test = setInterval(() => {
+    this.test[0] = setInterval(() => {
       console.log('TIME : ', time++);
     }, 1000);
 
-    setInterval(() => {
+    this.test[0] = setInterval(() => {
       setTimeout(() => {
         this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
       }, 100);
@@ -77,6 +78,7 @@ export class SystemInfoService {
     }, 3000);
   };
   public stopTest = () => {
-    clearInterval(this.test);
+    clearInterval(this.test[0]);
+    clearInterval(this.test[1]);
   };
 }
