@@ -92,9 +92,8 @@ export class PlcCommunicationService {
 
   private errorCallback = (err) => {
     if (typeof err !== 'undefined') {
-      console.log('ERROR:', err);
       this.plcEvent.emit('System_Error', err);
-      if (err === 'EUSERTIMEOUT') {
+      if (err.code === 'EUSERTIMEOUT') {
         setTimeout(() => {
           this.initConnection();
         }, config.plcConnection.reconnectDelay);

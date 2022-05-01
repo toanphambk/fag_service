@@ -44,7 +44,7 @@ export class SystemInfoService {
 
   private onError = (err) => {
     //send Post requiest
-    console.log(err);
+    console.log('ERROR:', err);
   };
 
   private test = () => {
