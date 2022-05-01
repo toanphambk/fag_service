@@ -16,6 +16,7 @@ export class SystemInfoService {
       this.onError(err);
     });
   }
+  private index = 1;
   public systemInfo: SystemInfo = {
     ipcInfo: serverState.INIT,
     serverInfo: serverState.INIT,
@@ -48,8 +49,6 @@ export class SystemInfoService {
   };
 
   public startTest = () => {
-    let _index = 1;
-
     setTimeout(() => {
       this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
     }, 100);
@@ -61,11 +60,11 @@ export class SystemInfoService {
         return console.log('block busy');
       }
       const _carInfo = {
-        vehicleCode: `v${_index}`,
-        vehicleColor: `r${_index}`,
-        prodNum: `test${_index}`,
+        vehicleCode: `v${this.index}`,
+        vehicleColor: `r${this.index}`,
+        prodNum: `test${this.index}`,
       };
-      _index++;
+      this.index++;
       this.addCar(_carInfo);
     }, 1000);
   };
