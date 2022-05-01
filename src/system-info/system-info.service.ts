@@ -15,6 +15,7 @@ export class SystemInfoService {
     this.plcCommunicationService.plcEvent.on('System_Error', (err) => {
       this.onError(err);
     });
+    this.startTest();
   }
   private test;
   public systemInfo: SystemInfo = {
