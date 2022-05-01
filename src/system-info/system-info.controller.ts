@@ -10,9 +10,12 @@ export class SystemInfoController {
     console.log(carInfo);
     return this.systemInfoService.addCar(carInfo);
   }
-  @Post('test')
-  test(@Body() carInfo: addCarDto): { source: string; description: string } {
-    console.log(carInfo);
-    return this.systemInfoService.addCar(carInfo);
+  @Post('startTest')
+  startTest() {
+    return this.systemInfoService.startTest();
+  }
+  @Post('stopTest')
+  stopTest() {
+    return this.systemInfoService.startTest();
   }
 }
