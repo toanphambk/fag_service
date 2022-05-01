@@ -56,7 +56,7 @@ export class SystemInfoService {
       console.log('TIME : ', time++);
     }, 1000);
 
-    this.test[0] = setInterval(() => {
+    this.test[1] = setInterval(() => {
       setTimeout(() => {
         this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
       }, 100);
