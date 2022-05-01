@@ -16,8 +16,6 @@ export class SystemInfoService {
       this.onError(err);
     });
   }
-  private test = [];
-
   public systemInfo: SystemInfo = {
     ipcInfo: serverState.INIT,
     serverInfo: serverState.INIT,
@@ -50,35 +48,25 @@ export class SystemInfoService {
   };
 
   public startTest = () => {
-    let _index = 0;
-    let time = 0;
-    this.test[0] = setInterval(() => {
-      console.log('TIME : ', time++);
-    }, 1000);
+    let _index = 1;
 
-    this.test[1] = setInterval(() => {
-      setTimeout(() => {
-        this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
-      }, 100);
-      setTimeout(() => {
-        this.plcCommunicationService.writeToPLC(['lbTrigger'], [false]);
-      }, 200);
-      setTimeout(() => {
-        if (!this.systemInfo.blockReady) {
-          return console.log('block busy');
-        }
-        const _carInfo = {
-          vehicleCode: `v${_index}`,
-          vehicleColor: `r${_index}`,
-          prodNum: `test${_index}`,
-        };
-        _index++;
-        this.addCar(_carInfo);
-      }, 1000);
-    }, 3000);
-  };
-  public stopTest = () => {
-    clearInterval(this.test[0]);
-    clearInterval(this.test[1]);
+    setTimeout(() => {
+      this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
+    }, 100);
+    setTimeout(() => {
+      this.plcCommunicationService.writeToPLC(['lbTrigger'], [false]);
+    }, 200);
+    setTimeout(() => {
+      if (!this.systemInfo.blockReady) {
+        return console.log('block busy');
+      }
+      const _carInfo = {
+        vehicleCode: `v${_index}`,
+        vehicleColor: `r${_index}`,
+        prodNum: `test${_index}`,
+      };
+      _index++;
+      this.addCar(_carInfo);
+    }, 1000);
   };
 }

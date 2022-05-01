@@ -18,8 +18,4 @@ export class SystemInfoController {
   startTest() {
     return this.systemInfoService.startTest();
   }
-  @Post('stopTest')
-  stopTest() {
-    return this.systemInfoService.stopTest();
-  }
 }
