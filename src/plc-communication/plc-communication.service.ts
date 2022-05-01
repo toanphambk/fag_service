@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PlcData, plcState, plcError } from '../Interface/plcData.interface';
 import events from 'events';
 import nodes7 from 'nodes7';
-import * as config from '../config.json';
+import * as config from '../system-config/entities/config.json';
 
 @Injectable()
 export class PlcCommunicationService {

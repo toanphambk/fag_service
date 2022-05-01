@@ -1,40 +1,19 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
 import { SystemConfigService } from './system-config.service';
-import { CreateSystemConfigDto } from './dto/create-system-config.dto';
 import { UpdateSystemConfigDto } from './dto/update-system-config.dto';
+import { SystemInfo } from '../Interface/systemInfo.interface';
 
 @Controller('system-config')
 export class SystemConfigController {
   constructor(private readonly systemConfigService: SystemConfigService) {}
 
   @Get()
-  getConfig() {
-    return this.systemConfigService.getConfig();
+  async getConfig() {
+    return await this.systemConfigService.get();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.systemConfigService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateSystemConfigDto: UpdateSystemConfigDto,
-  ) {
-    return this.systemConfigService.update(+id, updateSystemConfigDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.systemConfigService.remove(+id);
+  @Patch()
+  update(@Body() systemConfigDto: SystemInfo) {
+    return this.systemConfigService.update(systemConfigDto);
   }
 }

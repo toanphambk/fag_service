@@ -3,8 +3,7 @@ import { PlcCommunicationService } from '../plc-communication/plc-communication.
 import { addCarDto } from './dto/carInfo.dto';
 import { SystemInfo } from '../Interface/systemInfo.interface';
 import { serverState } from '../Interface/systemInfo.interface';
-import * as config from '../config.json';
-
+import * as config from '../system-config/entities/config.json';
 @Injectable()
 export class SystemInfoService {
   constructor(private plcCommunicationService: PlcCommunicationService) {

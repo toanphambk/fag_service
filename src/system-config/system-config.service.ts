@@ -1,26 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSystemConfigDto } from './dto/create-system-config.dto';
-import { UpdateSystemConfigDto } from './dto/update-system-config.dto';
-import * as config from '../config.json';
+import path from 'path';
+import config from '../system-config/entities/config.json';
+import { writeFileSync } from 'fs';
+import { SystemInfo } from '../Interface/systemInfo.interface';
+
 @Injectable()
 export class SystemConfigService {
-  create(createSystemConfigDto: CreateSystemConfigDto) {
-    return 'This action adds a new systemConfig';
-  }
+  get = async () => {
+    return config;
+  };
 
-  async getConfig() {
-    return JSON.stringify(config, undefined, 2);
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} systemConfig`;
-  }
-
-  update(id: number, updateSystemConfigDto: UpdateSystemConfigDto) {
-    return `This action updates a #${id} systemConfig`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} systemConfig`;
-  }
+  update = async (systemConfigDto: SystemInfo) => {
+    await writeFileSync(
+      path.resolve('./src/system-config/entities/config.json'),
+      JSON.stringify(systemConfigDto, undefined, 2),
+    );
+    return systemConfigDto;
+  };
 }
