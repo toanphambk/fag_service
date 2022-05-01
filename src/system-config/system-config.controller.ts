@@ -1,6 +1,5 @@
-import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Body, Patch } from '@nestjs/common';
 import { SystemConfigService } from './system-config.service';
-import { UpdateSystemConfigDto } from './dto/update-system-config.dto';
 import { SystemInfo } from '../Interface/systemInfo.interface';
 
 @Controller('system-config')
