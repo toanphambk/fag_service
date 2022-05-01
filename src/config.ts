@@ -28,4 +28,5 @@ export default {
     encoderEndPoint: 'encoder',
     triggerEndPoint: 'trigger',
   },
+  test: 1,
 };

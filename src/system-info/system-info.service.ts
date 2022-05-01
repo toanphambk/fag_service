@@ -3,6 +3,7 @@ import { PlcCommunicationService } from '../plc-communication/plc-communication.
 import { addCarDto } from './dto/carInfo.dto';
 import { SystemInfo } from '../Interface/systemInfo.interface';
 import { serverState } from '../Interface/systemInfo.interface';
+import config from 'src/config';
 
 @Injectable()
 export class SystemInfoService {
@@ -15,7 +16,7 @@ export class SystemInfoService {
       this.onError(err);
     });
   }
-
+  private test;
   public systemInfo: SystemInfo = {
     ipcInfo: serverState.INIT,
     serverInfo: serverState.INIT,
@@ -33,7 +34,7 @@ export class SystemInfoService {
     }
     this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'blockReady'],
-      [carInfo.prodNum, carInfo.vehicleCode, carInfo.vehicleColor, 1],
+      [carInfo.prodNum, carInfo.vehicleCode, carInfo.vehicleColor, config.test],
     );
   };
 
@@ -47,10 +48,10 @@ export class SystemInfoService {
     console.log('ERROR:', err);
   };
 
-  private test = () => {
+  public startTest = () => {
     let _index = 0;
     let time = 0;
-    setInterval(() => {
+    this.test = setInterval(() => {
       console.log('TIME : ', time++);
     }, 1000);
 
