@@ -1,31 +1,35 @@
 {
-  "dataBlock": {
-    "vehicleCode": "DB8,C0.4",
-    "vehicleColor": "DB8,C4.4",
-    "prodNum": "DB8,C8.16",
-    "blockReady": "DB8,INT24.1",
-    "ipcStatus": "DB1,INT0.1",
-    "serverStatus": "DB1,INT2.1",
-    "ipcClock": "DB1,X4.0",
-    "plcStatus": "DB1,INT6.1",
-    "errorID": "DB1,INT8.1 ",
-    "encoderValue": "DB1,INT10.4",
-    "lbTrigger": "DB1,X18.0"
-  },
-  "plcConnection": {
-    "ip": "192.168.0.1",
-    "port": 102,
-    "rack": 0,
-    "slot": 1,
-    "reconnectDelay": 2000,
-    "initDelay": 2000
-  },
-  "serverConnection": {
-    "ip": "192.168.0.2",
-    "port": 8000,
-    "systemStatusEndPoint": "systemStatus",
-    "encoderEndPoint": "encoder",
-    "triggerEndPoint": "trigger"
-  },
-  "test": 1
+    "dataBlock": {
+        "vehicleCode": "DB8,C0.4",
+        "vehicleColor": "DB8,C4.4",
+        "prodNum": "DB8,C8.16",
+        "blockReady": "DB8,INT24.1",
+        "ipcStatus": "DB1,INT0.1",
+        "serverStatus": "DB1,INT2.1",
+        "ipcClock": "DB1,X4.0",
+        "plcStatus": "DB1,INT6.1",
+        "errorID": "DB1,INT8.1 ",
+        "encoderValue": "DB1,INT10.4",
+        "lbTrigger": "DB1,X18.0"
+    },
+    "plcConnection": {
+        "ip": "192.168.0.1",
+        "port": 102,
+        "rack": 0,
+        "slot": 1,
+        "reconnectDelay": 2000,
+        "initDelay": 2000
+    },
+    "serverConnection": {
+        "ip": "192.168.0.2",
+        "port": 8000,
+        "systemStatusEndPoint": "systemStatus",
+        "encoderEndPoint": "encoder",
+        "triggerEndPoint": "trigger"
+    },
+    "app": {
+        "port": 3000,
+        "ip": "192.168.137.216",
+        "test": 1
+    }
 }

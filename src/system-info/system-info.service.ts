@@ -34,7 +34,12 @@ export class SystemInfoService {
     }
     this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'blockReady'],
-      [carInfo.prodNum, carInfo.vehicleCode, carInfo.vehicleColor, config.test],
+      [
+        carInfo.prodNum,
+        carInfo.vehicleCode,
+        carInfo.vehicleColor,
+        config.app.test,
+      ],
     );
   };
 

@@ -1,8 +1,0 @@
-POST 127.0.0.1:3000/system-info/addCar HTTP/1.1
-content-type: application/json
-
-{  
-  "vehicleCode": "test",
-  "vehicleColor": "red",
-  "prodNum": "zxcva",
-}
