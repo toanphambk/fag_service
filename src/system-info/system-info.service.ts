@@ -41,6 +41,10 @@ export class SystemInfoService {
         config.app.test,
       ],
     );
+    return {
+      source: 'data received',
+      description: JSON.stringify(carInfo),
+    };
   };
 
   private onStateChange = (plcState) => {
