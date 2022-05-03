@@ -4,6 +4,7 @@
         "vehicleColor": "DB8,C4.4",
         "prodNum": "DB8,C8.16",
         "blockReady": "DB8,INT24.1",
+        "vehicleMode": "DB8,INT26.1",
         "ipcStatus": "DB1,INT0.1",
         "serverStatus": "DB1,INT2.1",
         "ipcClock": "DB1,X4.0",

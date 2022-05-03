@@ -35,7 +35,7 @@ export class SystemInfoService {
     this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'blockReady'],
       [
-        carInfo.prodNum,
+        carInfo.VINNum,
         carInfo.vehicleCode,
         carInfo.vehicleColor,
         config.app.test,
@@ -71,7 +71,7 @@ export class SystemInfoService {
       const _carInfo = {
         vehicleCode: `v${this.index}`,
         vehicleColor: `r${this.index}`,
-        prodNum: `test${this.index}`,
+        VINNum: `test${this.index}`,
       };
       this.index++;
       this.addCar(_carInfo);
