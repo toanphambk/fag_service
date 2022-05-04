@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PlcCommunicationService } from '../plc-communication/plc-communication.service';
 import { addCarDto } from './dto/carInfo.dto';
-import { SystemInfo } from '../Interface/systemInfo.interface';
-import { serverState } from '../Interface/systemInfo.interface';
+import { serverState, SystemInfo } from '../Interface/systemInfo.interface';
 import * as config from '../system-config/entities/config.json';
 
 @Injectable()
@@ -15,6 +14,7 @@ export class SystemInfoService {
     this.plcCommunicationService.plcEvent.on('System_Error', (err) => {
       this.onError(err);
     });
+    this.plcCommunicationService.encoderLogger();
   }
   private index = 1;
   public systemInfo: SystemInfo = {

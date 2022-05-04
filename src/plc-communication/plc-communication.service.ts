@@ -72,12 +72,6 @@ export class PlcCommunicationService {
     if (JSON.stringify(this.plcData) !== JSON.stringify(val)) {
       this.plcEvent.emit('State_Change', val);
       this.plcData = val;
-      if (this.logData.length < 2000) {
-        this.logData.push(this.plcData.robotEncoderValue[3]);
-      } else {
-        appendFileSync('./data.txt', this.logData.toString());
-        this.logData = [];
-      }
     }
 
     if (this.queue.length === 0) {
@@ -98,6 +92,16 @@ export class PlcCommunicationService {
     this.queue.shift();
   };
 
+  public encoderLogger = () => {
+    setInterval(() => {
+      if (this.logData.length < 10) {
+        this.logData.push(this.plcData.robotEncoderValue[3]);
+      } else {
+        appendFileSync('data.txt', this.logData.toString());
+        this.logData = [];
+      }
+    }, 100);
+  };
   private errorCallback = (err) => {
     if (typeof err !== 'undefined') {
       this.plcEvent.emit('System_Error', err);
