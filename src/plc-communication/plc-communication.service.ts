@@ -97,7 +97,7 @@ export class PlcCommunicationService {
       if (this.logData.length < 10) {
         this.logData.push(this.plcData.robotEncoderValue[3]);
       } else {
-        appendFileSync('data.txt', this.logData.toString());
+        appendFileSync('data.txt', `${this.logData.toString()},`);
         this.logData = [];
       }
     }, 100);
