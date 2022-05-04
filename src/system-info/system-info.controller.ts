@@ -10,7 +10,7 @@ export class SystemInfoController {
     return 'this rout work';
   }
   @Post('addCar')
-  addCar(@Body() carInfo: addCarDto): { source: string; description: string } {
+  addCar(@Body() carInfo: addCarDto) {
     return this.systemInfoService.addCar(carInfo);
   }
   @Post('startTest')

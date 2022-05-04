@@ -43,7 +43,7 @@ export class SystemInfoService {
     );
     return {
       source: 'data received',
-      description: JSON.stringify(carInfo, undefined, 2),
+      description: carInfo,
     };
   };
 
