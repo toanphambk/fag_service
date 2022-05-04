@@ -13,7 +13,7 @@ export class PlcCommunicationService {
     ipcClock: false,
     lbTrigger: false,
     blockReady: false,
-    robotEncoderValue: 0,
+    robotEncoderValue: [0, 0, 0, 0],
     vehicleCode: '',
     vehicleColor: '',
     prodNum: '',

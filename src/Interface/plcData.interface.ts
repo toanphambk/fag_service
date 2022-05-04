@@ -2,7 +2,7 @@ export interface PlcData {
   plcStatus: plcState;
   errorID: plcError;
   ipcClock: boolean;
-  robotEncoderValue: number;
+  robotEncoderValue: Array<number>;
   lbTrigger: boolean;
   blockReady: boolean;
   vehicleCode: string;
