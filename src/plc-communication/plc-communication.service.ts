@@ -3,6 +3,7 @@ import { PlcData, plcState, plcError } from '../Interface/plcData.interface';
 import events from 'events';
 import nodes7 from 'nodes7';
 import config from '../system-config/entities/config.json';
+import { appendFileSync } from 'fs';
 
 @Injectable()
 export class PlcCommunicationService {
@@ -22,6 +23,7 @@ export class PlcCommunicationService {
   private conn = new nodes7();
   private dataBlock = config.dataBlock;
   private queue = [];
+  private logData = [];
 
   public initConnection = () => {
     this.conn.initiateConnection(
@@ -70,6 +72,12 @@ export class PlcCommunicationService {
     if (JSON.stringify(this.plcData) !== JSON.stringify(val)) {
       this.plcEvent.emit('State_Change', val);
       this.plcData = val;
+      if (this.logData.length < 2000) {
+        this.logData.push(this.plcData.robotEncoderValue[3]);
+      } else {
+        appendFileSync('./data.txt', this.logData.toString());
+        this.logData = [];
+      }
     }
 
     if (this.queue.length === 0) {
