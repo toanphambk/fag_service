@@ -14,7 +14,7 @@
         "lbTrigger": "DB1,X18.0"
     },
     "plcConnection": {
-        "ip": "192.168.1.10",
+        "ip": "192.168.1.50",
         "port": 102,
         "rack": 0,
         "slot": 1,
@@ -22,7 +22,7 @@
         "initDelay": 2000
     },
     "serverConnection": {
-        "ip": "192.168.0.2",
+        "ip": "192.168.2.2",
         "port": 8000,
         "systemStatusEndPoint": "systemStatus",
         "encoderEndPoint": "encoder",
@@ -30,7 +30,7 @@
     },
     "app": {
         "port": 3000,
-        "ip": "192.168.0.40",
+        "ip": "192.168.2.40",
         "test": 1
     }
 }
