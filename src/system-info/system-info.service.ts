@@ -14,7 +14,7 @@ export class SystemInfoService {
     this.plcCommunicationService.plcEvent.on('System_Error', (err) => {
       this.onError(err);
     });
-    this.plcCommunicationService.encoderLogger();
+    // this.plcCommunicationService.encoderLogger();
   }
   private index = 1;
   public systemInfo: SystemInfo = {
