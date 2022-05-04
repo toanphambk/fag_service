@@ -57,7 +57,7 @@ export class SystemInfoService {
     console.log('ERROR:', err);
   };
 
-  public startTest = () => {
+  public startTest = async () => {
     setTimeout(() => {
       this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
     }, 100);
@@ -74,7 +74,7 @@ export class SystemInfoService {
         VINNum: `test${this.index}`,
       };
       this.index++;
-      this.addCar(_carInfo);
+      return this.addCar(_carInfo);
     }, 1000);
   };
 }

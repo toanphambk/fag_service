@@ -11,7 +11,6 @@ export class SystemInfoController {
   }
   @Post('addCar')
   addCar(@Body() carInfo: addCarDto): { source: string; description: string } {
-    console.log(carInfo);
     return this.systemInfoService.addCar(carInfo);
   }
   @Post('startTest')
