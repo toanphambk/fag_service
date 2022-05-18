@@ -5,7 +5,5 @@ import { SystemConfigModule } from './system-config/system-config.module';
 
 @Module({
   imports: [SystemInfoModule, PlcCommunicationModule, SystemConfigModule],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

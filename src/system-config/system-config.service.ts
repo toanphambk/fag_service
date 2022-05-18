@@ -12,7 +12,7 @@ export class SystemConfigService {
 
   update = async (systemConfigDto: SystemInfo) => {
     await writeFileSync(
-      path.resolve('./src/system-config/entities/config.json'),
+      path.resolve('../system-config/entities/config.json'),
       JSON.stringify(systemConfigDto, undefined, 2),
     );
     return systemConfigDto;

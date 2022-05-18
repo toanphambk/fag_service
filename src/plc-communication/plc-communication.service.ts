@@ -102,6 +102,7 @@ export class PlcCommunicationService {
       }
     }, 100);
   };
+
   private errorCallback = (err) => {
     if (typeof err !== 'undefined') {
       this.plcEvent.emit('System_Error', err);
