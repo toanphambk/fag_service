@@ -1,7 +1,10 @@
 export interface PlcData {
+  ipcStatus: serverState;
+  serverStatus: serverState;
   plcStatus: plcState;
   errorID: plcError;
   ipcClock: boolean;
+  conveyorStatus: boolean;
   robotEncoderValue: Array<number>;
   lbTrigger: boolean;
   blockReady: boolean;
@@ -24,4 +27,10 @@ export enum plcError {
   ROBOT_ERROR = 1,
   CALIPRI_ERROR = 2,
   VEPOSE_ERROR = 3,
+}
+
+export enum serverState {
+  INIT = 0,
+  READY = 1,
+  ERROR = 2,
 }

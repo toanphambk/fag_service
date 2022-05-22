@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import path from 'path';
 import config from '../system-config/entities/config.json';
-import { writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { SystemInfo } from '../Interface/systemInfo.interface';
 
 @Injectable()
 export class SystemConfigService {
-  get = async () => {
+  public get = () => {
     return config;
   };
 
-  update = async (systemConfigDto: SystemInfo) => {
+  public update = async (systemConfig: SystemInfo) => {
     await writeFileSync(
-      path.resolve('../system-config/entities/config.json'),
-      JSON.stringify(systemConfigDto, undefined, 2),
+      path.resolve(__dirname + '/../system-config/entities/config.json'),
+      JSON.stringify(systemConfig, undefined, 2),
     );
-    return systemConfigDto;
+    return await readFileSync(
+      __dirname + '/../system-config/entities/config.json',
+      'utf8',
+    );
   };
 }

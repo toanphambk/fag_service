@@ -5,10 +5,6 @@ import { addCarDto } from './dto/carInfo.dto';
 @Controller('system-info')
 export class SystemInfoController {
   constructor(private systemInfoService: SystemInfoService) {}
-  @Get()
-  hello() {
-    return 'this rout work';
-  }
   @Post('addCar')
   addCar(@Body() carInfo: addCarDto) {
     return this.systemInfoService.addCar(carInfo);
@@ -16,5 +12,9 @@ export class SystemInfoController {
   @Post('startTest')
   startTest() {
     return this.systemInfoService.startTest();
+  }
+  @Get('encoderVal')
+  encoderVal() {
+    return this.systemInfoService.encoderLogger();
   }
 }

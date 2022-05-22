@@ -1,29 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { PlcData, plcState, plcError } from '../Interface/plcData.interface';
 import events from 'events';
 import nodes7 from 'nodes7';
 import config from '../system-config/entities/config.json';
-import { appendFileSync } from 'fs';
 
 @Injectable()
 export class PlcCommunicationService {
-  public plcData: PlcData = {
-    plcStatus: plcState.INIT,
-    errorID: plcError.SYSTEM_NORMAL,
-    ipcClock: false,
-    lbTrigger: false,
-    blockReady: false,
-    robotEncoderValue: [0, 0, 0, 0],
-    vehicleCode: '',
-    vehicleColor: '',
-    prodNum: '',
-  };
-
   public plcEvent = new events.EventEmitter();
   private conn = new nodes7();
   private dataBlock = config.dataBlock;
   private queue = [];
-  private logData = [];
 
   public initConnection = () => {
     this.conn.initiateConnection(
@@ -40,7 +25,7 @@ export class PlcCommunicationService {
         this.conn.setTranslationCB((tag) => {
           return this.dataBlock[tag];
         });
-
+        this.plcEvent.emit('Ipc_Ready');
         console.log('Add data block :', this.dataBlock);
 
         this.conn.addItems(
@@ -59,6 +44,35 @@ export class PlcCommunicationService {
     }, timeout);
   };
 
+  public loadPlcConfig = () => {
+    //drop connection
+    this.conn.dropConnection();
+    //generate data bloock config object
+    const _configBlock = {};
+    for (let i = 0; 19; i++) {
+      _configBlock[`vehicleCode${i}`] = `DB14,C${6 * i}.4`;
+      _configBlock[`vehicleMode${i}`] = `DB14,C${6 * i + 4}.1`;
+    }
+    _configBlock[`loadRequest`] = `DB14,X120.1`;
+    //transaltion and add item
+    this.conn.setTranslationCB((tag) => {
+      return _configBlock[tag];
+    });
+    this.conn.addItems(
+      Object.keys(_configBlock).map((key) => {
+        return key;
+      }),
+    );
+    //read item
+    this.conn.readAllItems(this.readCallback);
+    //remove item
+    this.conn.removeItems(
+      Object.keys(_configBlock).map((key) => {
+        return key;
+      }),
+    );
+  };
+
   public writeToPLC = (blockName: string[], data: any[]) => {
     this.queue.push(() => {
       this.conn.writeItems(blockName, data, this.writeCallback);
@@ -69,10 +83,10 @@ export class PlcCommunicationService {
     if (err) {
       return this.errorCallback(err);
     }
-    if (JSON.stringify(this.plcData) !== JSON.stringify(val)) {
-      this.plcEvent.emit('State_Change', val);
-      this.plcData = val;
+    if (val.loadRequest != undefined) {
+      this.plcEvent.emit('Plc_Load_Config', val);
     }
+    this.plcEvent.emit('Plc_Read_Callback', val);
 
     if (this.queue.length === 0) {
       return this.conn.readAllItems(this.readCallback);
@@ -90,17 +104,6 @@ export class PlcCommunicationService {
     }
     this.queue[0]();
     this.queue.shift();
-  };
-
-  public encoderLogger = () => {
-    setInterval(() => {
-      if (this.logData.length < 10) {
-        this.logData.push(this.plcData.robotEncoderValue[3]);
-      } else {
-        appendFileSync('data.txt', `${this.logData.toString()},`);
-        this.logData = [];
-      }
-    }, 100);
   };
 
   private errorCallback = (err) => {
