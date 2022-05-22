@@ -2,21 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { PlcCommunicationService } from '../plc-communication/plc-communication.service';
 import { addCarDto } from './dto/carInfo.dto';
 import { serverState, SystemInfo } from '../Interface/systemInfo.interface';
-import * as config from '../system-config/entities/config.json';
 import { plcState, plcError } from '../Interface/plcData.interface';
 import { HttpService } from '@nestjs/axios';
+import { SystemConfigService } from '../system-config/system-config.service';
 @Injectable()
 export class SystemInfoService {
   constructor(
     private plcCommunicationService: PlcCommunicationService,
     private httpService: HttpService,
+    private systemConfigService: SystemConfigService,
   ) {
     this.initSystem();
     setInterval(() => {
       if (this.systemInfo.plcData.conveyorStatus) {
-        this.encoderVal += 3;
+        this.encoderVal +=
+          this.systemConfigService.systemConfig.app.encoderRatio / 10;
       }
-    }, 50);
+    }, 100);
   }
 
   public encoderVal = 0;
@@ -42,6 +44,7 @@ export class SystemInfoService {
       prodNum: '',
     },
   };
+
   private index = 1;
 
   private initSystem = () => {
@@ -75,13 +78,14 @@ export class SystemInfoService {
       this.plcCommunicationService.plcEvent.emit('System_Error', _error);
       return _error;
     }
+
     this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'blockReady'],
       [
         carInfo.VINNum,
         carInfo.vehicleCode,
         carInfo.vehicleColor,
-        config.app.test,
+        this.systemConfigService.systemConfig.app.test,
       ],
     );
     return {

@@ -1,22 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import events from 'events';
 import nodes7 from 'nodes7';
-import config from '../system-config/entities/config.json';
+import { SystemConfigService } from '../system-config/system-config.service';
 
 @Injectable()
 export class PlcCommunicationService {
+  constructor(private systemConfigService: SystemConfigService) {}
   public plcEvent = new events.EventEmitter();
   private conn = new nodes7();
-  private dataBlock = config.dataBlock;
+  private dataBlock = this.systemConfigService.systemConfig.dataBlock;
   private queue = [];
 
   public initConnection = () => {
     this.conn.initiateConnection(
       {
-        port: config.plcConnection.port,
-        host: config.plcConnection.ip,
-        rack: config.plcConnection.rack,
-        slot: config.plcConnection.slot,
+        port: this.systemConfigService.systemConfig.plcConnection.port,
+        host: this.systemConfigService.systemConfig.plcConnection.ip,
+        rack: this.systemConfigService.systemConfig.plcConnection.rack,
+        slot: this.systemConfigService.systemConfig.plcConnection.slot,
       },
       (err) => {
         if (typeof err !== 'undefined') {
@@ -33,7 +34,9 @@ export class PlcCommunicationService {
             return key;
           }),
         );
-        this.initScan(config.plcConnection.initDelay);
+        this.initScan(
+          this.systemConfigService.systemConfig.plcConnection.initDelay,
+        );
       },
     );
   };
@@ -112,7 +115,7 @@ export class PlcCommunicationService {
       if (err.code === 'EUSERTIMEOUT') {
         setTimeout(() => {
           this.initConnection();
-        }, config.plcConnection.reconnectDelay);
+        }, this.systemConfigService.systemConfig.plcConnection.reconnectDelay);
       }
     }
   };

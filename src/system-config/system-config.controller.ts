@@ -8,7 +8,7 @@ export class SystemConfigController {
 
   @Get()
   async getConfig() {
-    return await this.systemConfigService.get();
+    return await this.systemConfigService.getConfig();
   }
 
   @Patch()

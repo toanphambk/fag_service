@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { SystemInfoService } from './system-info.service';
 import { PlcCommunicationModule } from '../plc-communication/plc-communication.module';
 import { SystemInfoController } from './system-info.controller';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  providers: [SystemInfoService],
+  providers: [],
   imports: [PlcCommunicationModule, HttpModule],
   controllers: [SystemInfoController],
 })
