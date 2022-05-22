@@ -117,7 +117,7 @@ export class SystemInfoService {
 
   public encoderLogger = () => {
     const _data = {
-      encoderVal: this.encoderVal,
+      encoderVal: Math.floor(this.encoderVal),
     };
     return _data;
   };

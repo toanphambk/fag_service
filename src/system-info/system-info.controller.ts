@@ -15,6 +15,6 @@ export class SystemInfoController {
   }
   @Get('encoderVal')
   encoderVal() {
-    return this.systemInfoService.encoderLogger();
+    return Math.floor(this.systemInfoService.encoderLogger());
   }
 }
