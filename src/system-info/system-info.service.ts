@@ -91,10 +91,9 @@ export class SystemInfoService {
       return _error;
     }
 
-    const carConfig = this.plcConfig.find(
+    const index = this.plcConfig.findIndex(
       (e) => e.vehicleCode == carInfo.vehicleCode.toUpperCase(),
     );
-    console.log(carConfig);
 
     this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
@@ -102,7 +101,7 @@ export class SystemInfoService {
         carInfo.VINNum.toUpperCase(),
         carInfo.vehicleCode.toUpperCase(),
         carInfo.vehicleColor.toUpperCase(),
-        carConfig.vehicleMode,
+        index,
         0,
       ],
     );

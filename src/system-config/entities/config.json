@@ -32,7 +32,7 @@
     "app": {
         "port": 3000,
         "ip": "192.168.2.40",
-        "test": 0,
+        "test": 1,
         "encoderRatio" : 63 
     }
 }

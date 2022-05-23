@@ -75,11 +75,7 @@ export class PlcCommunicationService {
     }
 
     if (val.vehicleCode0 == 0) {
-      this.conn.removeItems(
-        Object.keys(this.configBlock).map((key) => {
-          return key;
-        }),
-      );
+      this.conn.removeItems();
       this.plcEvent.emit('Plc_Load_Config', val);
       this.conn.dropConnection();
     } else {
