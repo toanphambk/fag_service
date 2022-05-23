@@ -5,7 +5,6 @@ import { serverState, SystemInfo } from '../Interface/systemInfo.interface';
 import { plcState, plcError } from '../Interface/plcData.interface';
 import { HttpService } from '@nestjs/axios';
 import { SystemConfigService } from '../system-config/system-config.service';
-import { loadavg } from 'os';
 
 @Injectable()
 export class SystemInfoService {
@@ -91,17 +90,18 @@ export class SystemInfoService {
       this.plcCommunicationService.plcEvent.emit('System_Error', _error);
       return _error;
     }
+
     const carConfig = this.plcConfig.find(
-      (e) => e.vehicleCode == carInfo.vehicleCode,
+      (e) => e.vehicleCode == carInfo.vehicleCode.toUpperCase(),
     );
     console.log(carConfig);
 
     this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
       [
-        carInfo.VINNum,
-        carInfo.vehicleCode,
-        carInfo.vehicleColor,
+        carInfo.VINNum.toUpperCase(),
+        carInfo.vehicleCode.toUpperCase(),
+        carInfo.vehicleColor.toUpperCase(),
         carConfig.vehicleMode,
         0,
       ],
@@ -158,11 +158,10 @@ export class SystemInfoService {
     const _plcConfig = [];
     for (let i = 0; i <= 20; i++) {
       _plcConfig.push({
-        vehicleCode: val[`vehicleCode${i}`],
+        vehicleCode: val[`vehicleCode${i}`].replaceAll('\x00', ''),
         vehicleMode: val[`vehicleMode${i}`],
       });
     }
-
     this.plcConfig = _plcConfig;
     console.log(this.plcConfig);
 
