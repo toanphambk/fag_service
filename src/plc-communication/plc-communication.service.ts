@@ -10,6 +10,7 @@ export class PlcCommunicationService {
   private conn = new nodes7();
   private dataBlock = this.systemConfigService.systemConfig.dataBlock;
   private queue = [];
+  public configBlock = {};
 
   public initConnection = () => {
     this.conn.initiateConnection(
@@ -23,19 +24,17 @@ export class PlcCommunicationService {
         if (typeof err !== 'undefined') {
           return this.errorCallback(err);
         }
+
         this.conn.setTranslationCB((tag) => {
           return this.dataBlock[tag];
         });
-        this.plcEvent.emit('Ipc_Ready');
+
         console.log('Add data block :', this.dataBlock);
 
         this.conn.addItems(
           Object.keys(this.dataBlock).map((key) => {
             return key;
           }),
-        );
-        this.initScan(
-          this.systemConfigService.systemConfig.plcConnection.initDelay,
         );
       },
     );
@@ -47,30 +46,18 @@ export class PlcCommunicationService {
     }, timeout);
   };
 
-  public loadPlcConfig = () => {
-    //drop connection
-    this.conn.dropConnection();
+  public loadConfig = () => {
     //generate data bloock config object
-    const _configBlock = {};
-    for (let i = 0; 19; i++) {
-      _configBlock[`vehicleCode${i}`] = `DB14,C${6 * i}.4`;
-      _configBlock[`vehicleMode${i}`] = `DB14,C${6 * i + 4}.1`;
+    for (let i = 0; i <= 20; i++) {
+      this.configBlock[`vehicleCode${i}`] = `DB14,C${6 * i}.4`;
+      this.configBlock[`vehicleMode${i}`] = `DB14,INT${6 * i + 4}.1`;
     }
-    _configBlock[`loadRequest`] = `DB14,X120.1`;
     //transaltion and add item
     this.conn.setTranslationCB((tag) => {
-      return _configBlock[tag];
+      return this.configBlock[tag];
     });
     this.conn.addItems(
-      Object.keys(_configBlock).map((key) => {
-        return key;
-      }),
-    );
-    //read item
-    this.conn.readAllItems(this.readCallback);
-    //remove item
-    this.conn.removeItems(
-      Object.keys(_configBlock).map((key) => {
+      Object.keys(this.configBlock).map((key) => {
         return key;
       }),
     );
@@ -86,10 +73,18 @@ export class PlcCommunicationService {
     if (err) {
       return this.errorCallback(err);
     }
-    if (val.loadRequest != undefined) {
+
+    if (val.vehicleCode0 == 0) {
+      this.conn.removeItems(
+        Object.keys(this.configBlock).map((key) => {
+          return key;
+        }),
+      );
       this.plcEvent.emit('Plc_Load_Config', val);
+      this.conn.dropConnection();
+    } else {
+      this.plcEvent.emit('Plc_Read_Callback', val);
     }
-    this.plcEvent.emit('Plc_Read_Callback', val);
 
     if (this.queue.length === 0) {
       return this.conn.readAllItems(this.readCallback);

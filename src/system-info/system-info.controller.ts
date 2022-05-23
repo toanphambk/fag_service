@@ -17,4 +17,9 @@ export class SystemInfoController {
   encoderVal() {
     return this.systemInfoService.encoderLogger();
   }
+
+  @Get('plcConfig')
+  loadPlcConfig() {
+    return this.systemInfoService.loadPlcConfig();
+  }
 }

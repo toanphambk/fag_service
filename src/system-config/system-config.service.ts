@@ -31,7 +31,7 @@ export class SystemConfigService {
       rack: 0,
       slot: 1,
       reconnectDelay: 2000,
-      initDelay: 2000,
+      initDelay: 5000,
     },
     serverConnection: {
       ip: '192.168.2.2',

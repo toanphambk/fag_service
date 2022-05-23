@@ -5,6 +5,8 @@ import { serverState, SystemInfo } from '../Interface/systemInfo.interface';
 import { plcState, plcError } from '../Interface/plcData.interface';
 import { HttpService } from '@nestjs/axios';
 import { SystemConfigService } from '../system-config/system-config.service';
+import { loadavg } from 'os';
+
 @Injectable()
 export class SystemInfoService {
   constructor(
@@ -13,16 +15,10 @@ export class SystemInfoService {
     private systemConfigService: SystemConfigService,
   ) {
     this.initSystem();
-    setInterval(() => {
-      if (this.systemInfo.plcData.conveyorStatus) {
-        this.encoderVal +=
-          this.systemConfigService.systemConfig.app.encoderRatio / 10;
-      }
-    }, 100);
   }
 
   public encoderVal = 0;
-  public plcConfig = {};
+  public plcConfig = [];
 
   public systemInfo: SystemInfo = {
     systemData: {
@@ -38,6 +34,7 @@ export class SystemInfoService {
       ipcClock: false,
       lbTrigger: false,
       blockReady: false,
+      loadRequest: false,
       robotEncoderValue: [0, 0, 0, 0],
       vehicleCode: '',
       vehicleColor: '',
@@ -49,6 +46,10 @@ export class SystemInfoService {
 
   private initSystem = () => {
     this.plcCommunicationService.initConnection();
+    this.plcCommunicationService.initScan(
+      this.systemConfigService.systemConfig.plcConnection.initDelay,
+    );
+
     this.plcCommunicationService.plcEvent.on('Plc_Read_Callback', (plcData) => {
       this.onPlcRead(plcData);
     });
@@ -56,16 +57,28 @@ export class SystemInfoService {
     this.plcCommunicationService.plcEvent.on('System_Error', (err) => {
       this.onError(err);
     });
+
     this.plcCommunicationService.plcEvent.on('Ipc_Ready', () => {
       this.onIpcReady;
     });
+
+    this.plcCommunicationService.plcEvent.on('Plc_Load_Config', (val) => {
+      this.onLoadPlcConfig(val);
+    });
+
+    setInterval(() => {
+      if (this.systemInfo.plcData.conveyorStatus) {
+        this.encoderVal +=
+          this.systemConfigService.systemConfig.app.encoderRatio / 10;
+      }
+    }, 100);
+
+    // Load PLC Config On Init
   };
 
-  public loadConfig = () => {
-    this.plcCommunicationService.plcEvent.once('Plc_Load_Config', (val) => {
-      console.log(this.plcConfig);
-    });
-    this.plcCommunicationService.loadPlcConfig();
+  public loadPlcConfig = () => {
+    this.plcCommunicationService.loadConfig();
+    return this.plcConfig;
   };
 
   public addCar = (carInfo: addCarDto) => {
@@ -78,14 +91,19 @@ export class SystemInfoService {
       this.plcCommunicationService.plcEvent.emit('System_Error', _error);
       return _error;
     }
+    const carConfig = this.plcConfig.find(
+      (e) => e.vehicleCode == carInfo.vehicleCode,
+    );
+    console.log(carConfig);
 
     this.plcCommunicationService.writeToPLC(
-      ['prodNum', 'vehicleCode', 'vehicleColor', 'blockReady'],
+      ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
       [
         carInfo.VINNum,
         carInfo.vehicleCode,
         carInfo.vehicleColor,
-        this.systemConfigService.systemConfig.app.test,
+        carConfig.vehicleMode,
+        0,
       ],
     );
     return {
@@ -113,6 +131,9 @@ export class SystemInfoService {
       this.index++;
       return this.addCar(_carInfo);
     }, 1000);
+    setTimeout(() => {
+      this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
+    }, 1000);
   };
 
   public encoderLogger = () => {
@@ -126,8 +147,34 @@ export class SystemInfoService {
     //update plcdata if change
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       this.systemInfo.plcData = data;
-      console.log(this.systemInfo);
+      console.log('change :', data);
+      if (this.systemInfo.plcData.loadRequest) {
+        this.plcCommunicationService.loadConfig();
+      }
     }
+  };
+
+  private onLoadPlcConfig = (val) => {
+    const _plcConfig = [];
+    for (let i = 0; i <= 20; i++) {
+      _plcConfig.push({
+        vehicleCode: val[`vehicleCode${i}`],
+        vehicleMode: val[`vehicleMode${i}`],
+      });
+    }
+
+    this.plcConfig = _plcConfig;
+    console.log(this.plcConfig);
+
+    this.plcCommunicationService.initConnection();
+
+    this.plcCommunicationService.initScan(
+      this.systemConfigService.systemConfig.plcConnection.initDelay,
+    );
+
+    setTimeout(() => {
+      this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
+    }, 3000);
   };
 
   private onError = (err) => {

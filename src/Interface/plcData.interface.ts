@@ -6,6 +6,7 @@ export interface PlcData {
   ipcClock: boolean;
   conveyorStatus: boolean;
   robotEncoderValue: Array<number>;
+  loadRequest: boolean;
   lbTrigger: boolean;
   blockReady: boolean;
   vehicleCode: string;
