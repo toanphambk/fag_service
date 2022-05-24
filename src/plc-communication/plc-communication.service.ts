@@ -50,12 +50,12 @@ export class PlcCommunicationService {
     //generate data bloock config object
     for (let i = 0; i <= 20; i++) {
       this.configBlock[`vehicleCode${i}`] = `DB14,C${6 * i}.4`;
-      this.configBlock[`vehicleMode${i}`] = `DB14,INT${6 * i + 4}.1`;
     }
     //transaltion and add item
     this.conn.setTranslationCB((tag) => {
       return this.configBlock[tag];
     });
+
     this.conn.addItems(
       Object.keys(this.configBlock).map((key) => {
         return key;
@@ -77,6 +77,7 @@ export class PlcCommunicationService {
     if (val.vehicleCode0 == 0) {
       this.conn.removeItems();
       this.plcEvent.emit('Plc_Load_Config', val);
+      this.queue = [];
       this.conn.dropConnection();
     } else {
       this.plcEvent.emit('Plc_Read_Callback', val);
@@ -90,6 +91,7 @@ export class PlcCommunicationService {
   };
 
   private writeCallback = (err) => {
+    console.log(this.queue);
     if (err) {
       return this.errorCallback(err);
     }

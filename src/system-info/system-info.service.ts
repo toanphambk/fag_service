@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PlcCommunicationService } from '../plc-communication/plc-communication.service';
 import { addCarDto } from './dto/carInfo.dto';
-import { serverState, SystemInfo } from '../Interface/systemInfo.interface';
-import { plcState, plcError } from '../Interface/plcData.interface';
+import { SystemInfo } from '../Interface/systemInfo.interface';
+import {
+  plcState,
+  plcError,
+  serverState,
+} from '../Interface/plcData.interface';
 import { HttpService } from '@nestjs/axios';
 import { SystemConfigService } from '../system-config/system-config.service';
 
@@ -30,6 +34,8 @@ export class SystemInfoService {
       plcStatus: plcState.INIT,
       errorID: plcError.SYSTEM_NORMAL,
       conveyorStatus: false,
+      conveyorSpeed: 0,
+      softEncoderValue: 0,
       ipcClock: false,
       lbTrigger: false,
       blockReady: false,
@@ -58,7 +64,7 @@ export class SystemInfoService {
     });
 
     this.plcCommunicationService.plcEvent.on('Ipc_Ready', () => {
-      this.onIpcReady;
+      this.onIpcReady();
     });
 
     this.plcCommunicationService.plcEvent.on('Plc_Load_Config', (val) => {
@@ -67,15 +73,18 @@ export class SystemInfoService {
 
     setInterval(() => {
       if (this.systemInfo.plcData.conveyorStatus) {
-        this.encoderVal +=
-          this.systemConfigService.systemConfig.app.encoderRatio / 10;
+        this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 10;
       }
     }, 100);
 
-    // Load PLC Config On Init
+    setInterval(() => {
+      this.softEncoderTranfer();
+    }, 250);
   };
 
   public loadPlcConfig = () => {
+    this.systemInfo.plcData.ipcStatus = serverState.INIT;
+    // this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
     this.plcCommunicationService.loadConfig();
     return this.plcConfig;
   };
@@ -101,7 +110,7 @@ export class SystemInfoService {
         carInfo.VINNum.toUpperCase(),
         carInfo.vehicleCode.toUpperCase(),
         carInfo.vehicleColor.toUpperCase(),
-        index,
+        index == -1 ? 0 : index,
         0,
       ],
     );
@@ -138,6 +147,7 @@ export class SystemInfoService {
   public encoderLogger = () => {
     const _data = {
       encoderVal: Math.floor(this.encoderVal),
+      conveyorStatus: this.systemInfo.plcData.conveyorStatus,
     };
     return _data;
   };
@@ -153,12 +163,24 @@ export class SystemInfoService {
     }
   };
 
+  private softEncoderTranfer = () => {
+    if (
+      this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
+      this.systemInfo.systemData.ipcInfo == serverState.INIT
+    ) {
+      return;
+    }
+    this.plcCommunicationService.writeToPLC(
+      ['softEncoderValue'],
+      [[(this.encoderVal & 0xffff0000) >> 16, this.encoderVal & 0xffff]],
+    );
+  };
+
   private onLoadPlcConfig = (val) => {
     const _plcConfig = [];
     for (let i = 0; i <= 20; i++) {
       _plcConfig.push({
         vehicleCode: val[`vehicleCode${i}`].replaceAll('\x00', ''),
-        vehicleMode: val[`vehicleMode${i}`],
       });
     }
     this.plcConfig = _plcConfig;
@@ -172,11 +194,15 @@ export class SystemInfoService {
 
     setTimeout(() => {
       this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
-    }, 3000);
+    }, this.systemConfigService.systemConfig.plcConnection.initDelay + 200);
+
+    setTimeout(() => {
+      this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
+    }, this.systemConfigService.systemConfig.plcConnection.initDelay + 1000);
   };
 
   private onError = (err) => {
-    //send Post requiest
+    //send Post request
     console.log('ERROR:', err);
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
   };

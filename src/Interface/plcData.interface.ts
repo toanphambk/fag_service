@@ -12,6 +12,8 @@ export interface PlcData {
   vehicleCode: string;
   vehicleColor: string;
   prodNum: string;
+  softEncoderValue: number;
+  conveyorSpeed: number;
 }
 
 export enum plcState {

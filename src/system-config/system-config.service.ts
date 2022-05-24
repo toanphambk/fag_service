@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import { SystemInfo } from '../Interface/systemInfo.interface';
+import { async } from 'rxjs';
 
 @Injectable()
 export class SystemConfigService {
@@ -17,6 +18,10 @@ export class SystemConfigService {
       blockReady: 'DB8,INT24.1',
       vehicleMode: 'DB8,INT26.1',
       conveyorStatus: 'DB8,X28.0',
+      loadRequest: 'DB8,INT30.1',
+      conveyorSpeed: 'DB8,INT32.1',
+      softEncoderValue: 'DB8,INT34.2',
+
       ipcStatus: 'DB1,INT0.1',
       serverStatus: 'DB1,INT2.1',
       ipcClock: 'DB1,X4.0',
@@ -31,7 +36,7 @@ export class SystemConfigService {
       rack: 0,
       slot: 1,
       reconnectDelay: 2000,
-      initDelay: 5000,
+      initDelay: 2000,
     },
     serverConnection: {
       ip: '192.168.2.2',
@@ -44,12 +49,11 @@ export class SystemConfigService {
       port: 3000,
       ip: '192.168.2.40',
       test: 1,
-      encoderRatio: 30,
     },
   };
 
   public getConfig = async () => {
-    this.systemConfig = JSON.parse(
+    this.systemConfig = await JSON.parse(
       await readFileSync(
         __dirname + '/../system-config/entities/config.json',
         'utf8',
