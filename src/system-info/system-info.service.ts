@@ -95,7 +95,7 @@ export class SystemInfoService {
       ) {
         this.conveyorState = conveyorState.RAMP_DOWN;
         setTimeout(() => {
-          this.conveyorState = conveyorState.STOP;
+          this.conveyorState = conveyorState.RUNNING;
         }, this.systemInfo.plcData.conveyorRampDown * 1000);
       }
 
