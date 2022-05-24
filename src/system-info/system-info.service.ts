@@ -114,20 +114,15 @@ export class SystemInfoService {
         this.rampIndex++;
       }
 
-      if (
-        this.conveyorState == conveyorState.RUNNING ||
-        this.conveyorState == conveyorState.STOP
-      ) {
-        this.encoderVal +=
-          (this.systemInfo.plcData.conveyorSpeed / 100) *
-          (this.conveyorState == conveyorState.RUNNING ? 1 : 0);
+      if (this.conveyorState == conveyorState.RUNNING) {
+        this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
         this.rampIndex = 1;
       }
     }, 10);
 
     setInterval(() => {
       this.softEncoderTranfer();
-    }, 100);
+    }, 250);
   };
 
   public loadPlcConfig = () => {
