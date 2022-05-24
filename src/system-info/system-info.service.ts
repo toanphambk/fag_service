@@ -205,11 +205,13 @@ export class SystemInfoService {
     //send Post request
     console.log('ERROR:', err);
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-    this.plcCommunicationService.initConnection();
+    if (err.code === 'EUSERTIMEOUT') {
+      this.plcCommunicationService.initConnection();
 
-    this.plcCommunicationService.initScan(
-      this.systemConfigService.systemConfig.plcConnection.initDelay,
-    );
+      this.plcCommunicationService.initScan(
+        this.systemConfigService.systemConfig.plcConnection.initDelay,
+      );
+    }
   };
 
   private onIpcReady = () => {
