@@ -207,11 +207,11 @@ export class SystemInfoService {
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
     if (err.code === 'EUSERTIMEOUT') {
       this.plcCommunicationService.initConnection();
-
-      this.plcCommunicationService.initScan(
-        this.systemConfigService.systemConfig.plcConnection.initDelay,
-      );
     }
+
+    this.plcCommunicationService.initScan(
+      this.systemConfigService.systemConfig.plcConnection.initDelay,
+    );
   };
 
   private onIpcReady = () => {
