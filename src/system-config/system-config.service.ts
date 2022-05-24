@@ -20,13 +20,14 @@ export class SystemConfigService {
       loadRequest: 'DB8,INT30.1',
       conveyorSpeed: 'DB8,INT32.1',
       softEncoderValue: 'DB8,INT34.2',
+      conveyorRampUp: 'DB8,INT38.1',
+      conveyorRampDown: 'DB8,INT40.1',
 
       ipcStatus: 'DB1,INT0.1',
       serverStatus: 'DB1,INT2.1',
       ipcClock: 'DB1,X4.0',
       plcStatus: 'DB1,INT6.1',
       errorID: 'DB1,INT8.1 ',
-      robotEncoderValue: 'DB1,INT10.4',
       lbTrigger: 'DB1,X18.0',
     },
     plcConnection: {

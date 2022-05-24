@@ -4,6 +4,8 @@ export interface PlcData {
   plcStatus: plcState;
   errorID: plcError;
   ipcClock: boolean;
+  conveyorRampUp: number;
+  conveyorRampDown: number;
   conveyorStatus: boolean;
   robotEncoderValue: Array<number>;
   loadRequest: boolean;

@@ -91,7 +91,6 @@ export class PlcCommunicationService {
   };
 
   private writeCallback = (err) => {
-    console.log(this.queue);
     if (err) {
       return this.errorCallback(err);
     }
