@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import { SystemInfo } from '../Interface/systemInfo.interface';
-import { async } from 'rxjs';
 
 @Injectable()
 export class SystemConfigService {
