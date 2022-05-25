@@ -7,10 +7,8 @@
         "vehicleMode": "DB8,INT26.1",
         "conveyorStatus": "DB8,X28.0",
         "loadRequest" : "DB8,INT30.1",
-        "conveyorSpeed":"DB8,INT32.1",
-        "softEncoderValue": "DB8,INT34.2",
-        "conveyorRampUp": "DB8,INT38.1",
-        "conveyorRampDown": "DB8,INT40.1",
+        "conveyorSpeed":"DB8,REAL32",
+        "softEncoderValue": "DB8,INT36.2",
 
         "ipcStatus": "DB1,INT0.1",
         "serverStatus": "DB1,INT2.1",

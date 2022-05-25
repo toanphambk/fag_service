@@ -9,6 +9,7 @@ import {
 } from '../Interface/plcData.interface';
 import { HttpService } from '@nestjs/axios';
 import { SystemConfigService } from '../system-config/system-config.service';
+import { async } from 'rxjs';
 
 @Injectable()
 export class SystemInfoService {
@@ -49,12 +50,12 @@ export class SystemInfoService {
     },
   };
 
-  private rampIndex = 1;
+  private rampIndex = 0;
   private index = 0;
 
-  private initSystem = () => {
-    this.plcCommunicationService.initConnection();
-    this.plcCommunicationService.initScan(
+  private initSystem = async () => {
+    await this.plcCommunicationService.initConnection();
+    await this.plcCommunicationService.initScan(
       this.systemConfigService.systemConfig.plcConnection.initDelay,
     );
 
@@ -79,44 +80,9 @@ export class SystemInfoService {
     });
 
     setInterval(() => {
-      if (
-        this.systemInfo.plcData.conveyorStatus == false &&
-        this.conveyorState == conveyorState.RUNNING
-      ) {
-        this.conveyorState = conveyorState.RAMP_UP;
-        setTimeout(() => {
-          this.conveyorState = conveyorState.RUNNING;
-        }, this.systemInfo.plcData.conveyorRampUp * 1000);
-      }
-
-      if (
-        this.systemInfo.plcData.conveyorStatus == true &&
-        this.conveyorState == conveyorState.STOP
-      ) {
-        this.conveyorState = conveyorState.RAMP_DOWN;
-        setTimeout(() => {
-          this.conveyorState = conveyorState.RUNNING;
-        }, this.systemInfo.plcData.conveyorRampDown * 1000);
-      }
-
-      if (this.conveyorState == conveyorState.RAMP_UP) {
-        this.encoderVal +=
-          (this.systemInfo.plcData.conveyorSpeed * this.rampIndex) /
-          (this.systemInfo.plcData.conveyorRampUp * 1000 * 1000);
-        this.rampIndex++;
-      }
-
-      if (this.conveyorState == conveyorState.RAMP_DOWN) {
-        this.encoderVal +=
-          (this.systemInfo.plcData.conveyorSpeed *
-            (this.systemInfo.plcData.conveyorRampUp * 100 - this.rampIndex)) /
-          (this.systemInfo.plcData.conveyorRampUp * 1000 * 1000);
-        this.rampIndex++;
-      }
-
       if (this.conveyorState == conveyorState.RUNNING) {
         this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
-        this.rampIndex = 1;
+        this.rampIndex = 0;
       }
     }, 10);
 
@@ -190,7 +156,7 @@ export class SystemInfoService {
   public encoderLogger = () => {
     const _data = {
       encoderVal: Math.floor(this.encoderVal),
-      conveyorStatus: this.systemInfo.plcData.conveyorStatus,
+      conveyorStatus: conveyorState[this.conveyorState],
     };
     return _data;
   };
@@ -253,7 +219,7 @@ export class SystemInfoService {
     //send Post request
     this.systemInfo.systemData.ipcInfo = serverState.READY;
     console.log('ERROR:', err);
-    this.systemInfo.systemData.ipcInfo = serverState.ERROR;
+    // this.systemInfo.systemData.ipcInfo = serverState.ERROR;
     // if (err.code === 'EUSERTIMEOUT') {
     //   this.plcCommunicationService.initConnection();
     // }

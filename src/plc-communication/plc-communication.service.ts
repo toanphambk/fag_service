@@ -13,37 +13,42 @@ export class PlcCommunicationService {
   public configBlock = {};
 
   public initConnection = () => {
-    this.conn.initiateConnection(
-      {
-        port: this.systemConfigService.systemConfig.plcConnection.port,
-        host: this.systemConfigService.systemConfig.plcConnection.ip,
-        rack: this.systemConfigService.systemConfig.plcConnection.rack,
-        slot: this.systemConfigService.systemConfig.plcConnection.slot,
-      },
-      (err) => {
-        if (typeof err !== 'undefined') {
-          return this.errorCallback(err);
-        }
+    return new Promise<void>((resolve, reject) => {
+      this.conn.initiateConnection(
+        {
+          port: this.systemConfigService.systemConfig.plcConnection.port,
+          host: this.systemConfigService.systemConfig.plcConnection.ip,
+          rack: this.systemConfigService.systemConfig.plcConnection.rack,
+          slot: this.systemConfigService.systemConfig.plcConnection.slot,
+        },
+        (err) => {
+          if (typeof err !== 'undefined') {
+            reject(this.errorCallback(err));
+          }
 
-        this.conn.setTranslationCB((tag) => {
-          return this.dataBlock[tag];
-        });
+          this.conn.setTranslationCB((tag) => {
+            return this.dataBlock[tag];
+          });
 
-        console.log('Add data block :', this.dataBlock);
+          console.log('Add data block :', this.dataBlock);
 
-        this.conn.addItems(
-          Object.keys(this.dataBlock).map((key) => {
-            return key;
-          }),
-        );
-      },
-    );
+          this.conn.addItems(
+            Object.keys(this.dataBlock).map((key) => {
+              return key;
+            }),
+          );
+          resolve();
+        },
+      );
+    });
   };
 
   public initScan = (timeout: number) => {
-    setTimeout(() => {
-      this.conn.readAllItems(this.readCallback);
-    }, timeout);
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        resolve(this.conn.readAllItems(this.readCallback));
+      }, timeout);
+    });
   };
 
   public loadConfig = () => {
