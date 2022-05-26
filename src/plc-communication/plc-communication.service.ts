@@ -54,6 +54,7 @@ export class PlcCommunicationService {
 
   public loadConfig = () => {
     //generate data bloock config object
+
     for (let i = 0; i <= 20; i++) {
       this.configBlock[`vehicleCode${i}`] = `DB14,C${4 * i}.4`;
     }

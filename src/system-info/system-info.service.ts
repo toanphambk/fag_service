@@ -185,6 +185,7 @@ export class SystemInfoService {
   };
 
   private onLoadPlcConfig = (val) => {
+    this.encoderVal = 0;
     const _plcConfig = [];
     for (let i = 0; i <= 20; i++) {
       _plcConfig.push({
