@@ -7,15 +7,12 @@ import {
   plcError,
   serverState,
 } from '../Interface/plcData.interface';
-import { HttpService } from '@nestjs/axios';
 import { SystemConfigService } from '../system-config/system-config.service';
-import { async } from 'rxjs';
 
 @Injectable()
 export class SystemInfoService {
   constructor(
     private plcCommunicationService: PlcCommunicationService,
-    private httpService: HttpService,
     private systemConfigService: SystemConfigService,
   ) {
     this.initSystem();
@@ -80,10 +77,7 @@ export class SystemInfoService {
     });
 
     setInterval(() => {
-      if (this.conveyorState == conveyorState.RUNNING) {
         this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
-        this.rampIndex = 0;
-      }
     }, 10);
 
     setInterval(() => {
