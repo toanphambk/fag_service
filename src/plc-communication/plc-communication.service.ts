@@ -37,6 +37,7 @@ export class PlcCommunicationService {
               return key;
             }),
           );
+          this.plcEvent.emit('Ipc_Ready');
           resolve();
         },
       );

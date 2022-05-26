@@ -77,7 +77,7 @@ export class SystemInfoService {
     });
 
     setInterval(() => {
-        this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
+      this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
     }, 10);
 
     setInterval(() => {
@@ -211,7 +211,7 @@ export class SystemInfoService {
 
   private onError = (err) => {
     //send Post request
-    this.systemInfo.systemData.ipcInfo = serverState.READY;
+    this.systemInfo.systemData.ipcInfo = serverState.ERROR;
     console.log('ERROR:', err);
     // this.systemInfo.systemData.ipcInfo = serverState.ERROR;
     // if (err.code === 'EUSERTIMEOUT') {
