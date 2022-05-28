@@ -39,3 +39,9 @@ export enum serverState {
   READY = 1,
   ERROR = 2,
 }
+
+export enum queueState {
+  INIT = 0,
+  READY = 1,
+  ERROR = 2,
+}

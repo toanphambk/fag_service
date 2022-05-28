@@ -15,7 +15,7 @@ export class SystemInfoController {
   }
   @Get('encoderVal')
   encoderVal() {
-    return this.systemInfoService.encoderLogger();
+    return this.systemInfoService.eyeFlowEncoderLogger();
   }
 
   @Get('plcConfig')

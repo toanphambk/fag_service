@@ -8,7 +8,7 @@
         "conveyorStatus": "DB8,X28.0",
         "loadRequest" : "DB8,INT30.1",
         "conveyorSpeed":"DB8,REAL32",
-        "softEncoderValue": "DB8,INT36.2",
+        "softEncoderValue": "DB8,DINT36.1",
 
         "ipcStatus": "DB1,INT0.1",
         "serverStatus": "DB1,INT2.1",

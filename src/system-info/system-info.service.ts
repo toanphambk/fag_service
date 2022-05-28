@@ -9,13 +9,12 @@ import {
 } from '../Interface/plcData.interface';
 import { HttpService } from '@nestjs/axios';
 import { SystemConfigService } from '../system-config/system-config.service';
-import { async } from 'rxjs';
+import { runInThisContext } from 'vm';
 
 @Injectable()
 export class SystemInfoService {
   constructor(
     private plcCommunicationService: PlcCommunicationService,
-    private httpService: HttpService,
     private systemConfigService: SystemConfigService,
   ) {
     this.initSystem();
@@ -50,14 +49,15 @@ export class SystemInfoService {
     },
   };
 
-  private rampIndex = 0;
   private index = 0;
 
   private initSystem = async () => {
-    await this.plcCommunicationService.initConnection();
-    await this.plcCommunicationService.initScan(
-      this.systemConfigService.systemConfig.plcConnection.initDelay,
+    await this.plcCommunicationService.initConnection(
+      this.systemConfigService.systemConfig.dataBlock,
     );
+    setTimeout(() => {
+      this.plcCommunicationService.startScan();
+    }, this.systemConfigService.systemConfig.plcConnection.initDelay);
 
     this.plcCommunicationService.plcEvent.on('Plc_Read_Callback', (plcData) => {
       this.onPlcRead(plcData);
@@ -74,31 +74,47 @@ export class SystemInfoService {
     this.plcCommunicationService.plcEvent.on('Ipc_Init', () => {
       this.onIpcInit();
     });
-
-    this.plcCommunicationService.plcEvent.on('Plc_Load_Config', (val) => {
-      this.onLoadPlcConfig(val);
-    });
-
-    setInterval(() => {
-      if (this.conveyorState == conveyorState.RUNNING) {
-        this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
-        this.rampIndex = 0;
-      }
-    }, 10);
+    this.initSoftEncoder();
 
     setInterval(() => {
       this.softEncoderTranfer();
-    }, 250);
+    }, 200);
   };
 
-  public loadPlcConfig = () => {
-    this.systemInfo.plcData.ipcStatus = serverState.INIT;
+  public loadPlcConfig = async () => {
     // this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
-    this.plcCommunicationService.loadConfig();
+    // this.encoderVal = 0;
+    this.systemInfo.plcData.conveyorStatus = false;
+    this.plcConfig = await this.plcCommunicationService.loadConfig();
+
+    await new Promise<void>((resolve) => {
+      setTimeout(async () => {
+        await this.plcCommunicationService.initConnection(
+          this.systemConfigService.systemConfig.dataBlock,
+        );
+        await this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
+        this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
+        this.plcCommunicationService.startScan();
+        resolve();
+      }, 3000);
+    });
+    this.encoderVal = 0;
     return this.plcConfig;
   };
 
-  public addCar = (carInfo: addCarDto) => {
+  public initSoftEncoder = () => {
+    setTimeout(() => this.initSoftEncoder(), 100);
+    if (this.systemInfo.plcData.conveyorStatus) {
+      this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 10;
+      this.index++;
+    }
+    if (this.index == 100) {
+      this.index = 0;
+      return console.log('ten sec log : ', Math.floor(this.encoderVal));
+    }
+  };
+
+  public addCar = async (carInfo: addCarDto) => {
     if (!this.systemInfo.plcData.blockReady) {
       const _error = {
         source: 'Plc Block Ready Error',
@@ -113,7 +129,7 @@ export class SystemInfoService {
       (e) => e.vehicleCode == carInfo.vehicleCode.toUpperCase(),
     );
 
-    this.plcCommunicationService.writeToPLC(
+    await this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
       [
         carInfo.VINNum.toUpperCase(),
@@ -123,10 +139,71 @@ export class SystemInfoService {
         0,
       ],
     );
+
     return {
       source: 'data received',
       description: carInfo,
     };
+  };
+
+  public eyeFlowEncoderLogger = () => {
+    const _data = {
+      encoderVal: Math.floor(this.encoderVal),
+      conveyorStatus: conveyorState[this.conveyorState],
+    };
+    return _data;
+  };
+
+  private softEncoderTranfer = () => {
+    if (
+      this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
+      this.systemInfo.systemData.ipcInfo == serverState.INIT
+    )
+      return;
+
+    if (this.encoderVal == this.systemInfo.plcData.softEncoderValue) return;
+
+    this.plcCommunicationService.writeToPLC(
+      ['softEncoderValue'],
+      [[this.encoderVal]],
+    );
+  };
+
+  private onPlcRead = (data) => {
+    //update plcdata if change
+    if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
+      this.systemInfo.plcData = data;
+      console.log('change :', data);
+      if (this.systemInfo.plcData.loadRequest) {
+        this.loadPlcConfig();
+      }
+    }
+  };
+
+  private onError = (err) => {
+    //send Post request
+    this.systemInfo.systemData.ipcInfo = serverState.ERROR;
+    console.log('ERROR:', err);
+    this.systemInfo.systemData.ipcInfo = serverState.ERROR;
+    if (err.code === 'EUSERTIMEOUT') {
+      setTimeout(() => {
+        this.plcCommunicationService.initConnection(
+          this.systemConfigService.systemConfig.dataBlock,
+        );
+      }, 2000);
+    }
+
+    // this.plcCommunicationService.initScan(
+    //   this.systemConfigService.systemConfig.plcConnection.initDelay,
+    // );
+  };
+
+  private onIpcInit = () => {
+    this.systemInfo.systemData.ipcInfo = serverState.INIT;
+  };
+
+  private onIpcReady = () => {
+    this.systemInfo.systemData.ipcInfo = serverState.READY;
   };
 
   public startTest = async () => {
@@ -151,89 +228,5 @@ export class SystemInfoService {
     setTimeout(() => {
       this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
     }, 1000);
-  };
-
-  public encoderLogger = () => {
-    const _data = {
-      encoderVal: Math.floor(this.encoderVal),
-      conveyorStatus: conveyorState[this.conveyorState],
-    };
-    return _data;
-  };
-
-  private softEncoderTranfer = () => {
-    if (
-      this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
-      this.systemInfo.systemData.ipcInfo == serverState.INIT
-    ) {
-      return;
-    }
-    this.plcCommunicationService.writeToPLC(
-      ['softEncoderValue'],
-      [
-        [
-          Math.floor((this.encoderVal & 0xffff0000) >> 16),
-          Math.floor(this.encoderVal & 0xffff),
-        ],
-      ],
-    );
-  };
-
-  private onPlcRead = (data) => {
-    //update plcdata if change
-    if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
-      this.systemInfo.plcData = data;
-      console.log('change :', data);
-      if (this.systemInfo.plcData.loadRequest) {
-        this.plcCommunicationService.loadConfig();
-      }
-    }
-  };
-
-  private onLoadPlcConfig = (val) => {
-    const _plcConfig = [];
-    for (let i = 0; i <= 20; i++) {
-      _plcConfig.push({
-        vehicleCode: val[`vehicleCode${i}`].replaceAll('\x00', ''),
-      });
-    }
-    this.plcConfig = _plcConfig;
-    console.log(this.plcConfig);
-
-    this.plcCommunicationService.initConnection();
-
-    this.plcCommunicationService.initScan(
-      this.systemConfigService.systemConfig.plcConnection.initDelay,
-    );
-
-    setTimeout(() => {
-      this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
-    }, this.systemConfigService.systemConfig.plcConnection.initDelay + 200);
-
-    setTimeout(() => {
-      this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
-    }, this.systemConfigService.systemConfig.plcConnection.initDelay + 1000);
-  };
-
-  private onError = (err) => {
-    //send Post request
-    this.systemInfo.systemData.ipcInfo = serverState.READY;
-    console.log('ERROR:', err);
-    // this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-    // if (err.code === 'EUSERTIMEOUT') {
-    //   this.plcCommunicationService.initConnection();
-    // }
-
-    // this.plcCommunicationService.initScan(
-    //   this.systemConfigService.systemConfig.plcConnection.initDelay,
-    // );
-  };
-
-  private onIpcInit = () => {
-    this.systemInfo.systemData.ipcInfo = serverState.INIT;
-  };
-
-  private onIpcReady = () => {
-    this.systemInfo.systemData.ipcInfo = serverState.READY;
   };
 }
