@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import events from 'events';
 import nodes7 from 'nodes7';
 import { SystemConfigService } from '../system-config/system-config.service';
