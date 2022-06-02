@@ -3,8 +3,7 @@ import events from 'events';
 import nodes7 from 'nodes7';
 import { SystemConfigService } from '../system-config/system-config.service';
 import { queueState } from '../Interface/plcData.interface';
-import { config } from 'process';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class PlcCommunicationService {
   constructor(private systemConfigService: SystemConfigService) {}
@@ -30,6 +29,7 @@ export class PlcCommunicationService {
         (err) => {
           if (typeof err !== 'undefined') {
             reject(this.errorCallback(err));
+            return;
           }
 
           this.conn.setTranslationCB((tag) => {
@@ -41,9 +41,10 @@ export class PlcCommunicationService {
               return key;
             }),
           );
-          console.log(setting);
 
           this.initScanProcess();
+          console.log('\n CONNECTION INIT DONE\n');
+
           resolve();
         },
       );
@@ -67,11 +68,16 @@ export class PlcCommunicationService {
         this.conn.writeItems(
           this.queue.buffer[0].blockName,
           this.queue.buffer[0].data,
-          (err) => {
+          async (err) => {
             if (err) {
               reject(this.errorCallback(err));
+              return;
             }
-            resolve();
+            this.plcEvent.emit(
+              this.queue.buffer[0].uuid,
+              await this.readFromPlc(),
+            );
+            resolve(await this.readFromPlc());
           },
         );
       });
@@ -89,47 +95,48 @@ export class PlcCommunicationService {
   };
 
   public loadConfig = async () => {
-    this.queue.buffer = [];
-    this.queue.status = queueState.INIT;
-    const _plcConfig = [];
-    let _config = {};
+    try {
+      this.queue.status = queueState.INIT;
+      const _plcConfig = [];
+      let _config = {};
 
-    this.conn.dropConnection();
-
-    setTimeout(async () => {
-      try {
-        for (let i = 0; i <= 20; i++) {
-          this.configBlock[`vehicleCode${i}`] = `DB14,C${4 * i}.4`;
-        }
-        await this.initConnection(this.configBlock);
-        _config = await this.readFromPlc();
-        console.log(_config);
-      } catch (error) {
-        this.errorCallback(error);
+      for (let i = 0; i <= 20; i++) {
+        this.configBlock[`vehicleCode${i}`] = `DB14,C${4 * i}.4`;
       }
-    }, 500);
 
-    setTimeout(() => {
-      this.conn.removeItems();
-      this.conn.dropConnection();
+      await this.addItem(this.configBlock);
+
+      _config = await this.readFromPlc();
+
       if (_config == undefined) return;
+
       for (let i = 0; i <= 20; i++) {
         _plcConfig.push({
           vehicleCode: _config[`vehicleCode${i}`].replaceAll('\x00', ''),
         });
       }
-    }, 1000);
 
-    return await new Promise<any[]>((resolve) => {
-      setTimeout(() => {
-        this.queue.status = queueState.READY;
-        resolve(_plcConfig);
-      }, 2000);
-    });
+      this.queue.status = queueState.READY;
+      this.conn.removeItems();
+      this.queue.buffer = [];
+      return _plcConfig;
+    } catch (error) {
+      this.errorCallback(error);
+    }
   };
 
   public writeToPLC = (blockName: string[], data: any[]) => {
-    this.queue.buffer.push({ blockName: blockName, data: data });
+    return new Promise<void>((resolve) => {
+      const _uuid = uuidv4();
+      this.queue.buffer.push({
+        blockName: blockName,
+        data: data,
+        uuid: _uuid,
+      });
+      this.plcEvent.once(_uuid, (data) => {
+        resolve(data);
+      });
+    });
   };
 
   private readFromPlc = () => {
@@ -138,15 +145,33 @@ export class PlcCommunicationService {
         if (err) {
           this.errorCallback(err);
           reject(err);
+          return;
         }
         this.plcEvent.emit('Plc_Read_Callback', data);
-
         resolve(data);
       });
     });
   };
 
+  public addItem = (items) => {
+    return new Promise<void>((resolve) => {
+      this.conn.removeItems();
+      this.conn.setTranslationCB((tag) => {
+        return items[tag];
+      });
+      this.conn.addItems(
+        Object.keys(items).map((key) => {
+          return key;
+        }),
+      );
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    });
+  };
+
   private errorCallback = (err) => {
+    this.queue.status = queueState.ERROR;
     if (typeof err !== 'undefined') {
       this.plcEvent.emit('System_Error', err);
     }

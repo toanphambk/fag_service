@@ -7,9 +7,7 @@ import {
   plcError,
   serverState,
 } from '../Interface/plcData.interface';
-import { HttpService } from '@nestjs/axios';
 import { SystemConfigService } from '../system-config/system-config.service';
-import { runInThisContext } from 'vm';
 
 @Injectable()
 export class SystemInfoService {
@@ -41,7 +39,7 @@ export class SystemInfoService {
       ipcClock: false,
       lbTrigger: false,
       blockReady: false,
-      loadRequest: false,
+      loadRequest: 0,
       robotEncoderValue: [0, 0, 0, 0],
       vehicleCode: '',
       vehicleColor: '',
@@ -55,9 +53,8 @@ export class SystemInfoService {
     await this.plcCommunicationService.initConnection(
       this.systemConfigService.systemConfig.dataBlock,
     );
-    setTimeout(() => {
-      this.plcCommunicationService.startScan();
-    }, this.systemConfigService.systemConfig.plcConnection.initDelay);
+    this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
+    this.plcCommunicationService.startScan();
 
     this.plcCommunicationService.plcEvent.on('Plc_Read_Callback', (plcData) => {
       this.onPlcRead(plcData);
@@ -74,6 +71,7 @@ export class SystemInfoService {
     this.plcCommunicationService.plcEvent.on('Ipc_Init', () => {
       this.onIpcInit();
     });
+
     this.initSoftEncoder();
 
     setInterval(() => {
@@ -83,21 +81,14 @@ export class SystemInfoService {
 
   public loadPlcConfig = async () => {
     // this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
-    // this.encoderVal = 0;
     this.systemInfo.plcData.conveyorStatus = false;
     this.plcConfig = await this.plcCommunicationService.loadConfig();
-
-    await new Promise<void>((resolve) => {
-      setTimeout(async () => {
-        await this.plcCommunicationService.initConnection(
-          this.systemConfigService.systemConfig.dataBlock,
-        );
-        await this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
-        this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
-        this.plcCommunicationService.startScan();
-        resolve();
-      }, 3000);
-    });
+    await this.plcCommunicationService.addItem(
+      this.systemConfigService.systemConfig.dataBlock,
+    );
+    this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
+    this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
+    this.plcCommunicationService.startScan();
     this.encoderVal = 0;
     return this.plcConfig;
   };
@@ -165,34 +156,26 @@ export class SystemInfoService {
 
     this.plcCommunicationService.writeToPLC(
       ['softEncoderValue'],
-      [[this.encoderVal]],
+      [this.encoderVal],
     );
   };
 
   private onPlcRead = (data) => {
     //update plcdata if change
+    if (data.blockReady === undefined) return;
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       this.systemInfo.plcData = data;
       console.log('change :', data);
-      if (this.systemInfo.plcData.loadRequest) {
+      if (this.systemInfo.plcData.loadRequest === 1) {
         this.loadPlcConfig();
       }
     }
   };
 
-  private onError = (err) => {
+  private onError = async (err) => {
     //send Post request
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-    console.log('ERROR:', err);
-    this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-    if (err.code === 'EUSERTIMEOUT') {
-      setTimeout(() => {
-        this.plcCommunicationService.initConnection(
-          this.systemConfigService.systemConfig.dataBlock,
-        );
-      }, 2000);
-    }
-
+    console.log('ERROR Call Back:', err);
     // this.plcCommunicationService.initScan(
     //   this.systemConfigService.systemConfig.plcConnection.initDelay,
     // );
