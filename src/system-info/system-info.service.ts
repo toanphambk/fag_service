@@ -87,21 +87,29 @@ export class SystemInfoService {
       this.systemConfigService.systemConfig.dataBlock,
     );
     this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
-    this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
     this.plcCommunicationService.startScan();
+    this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
+    console.log(
+      `[${new Date().toLocaleString()}] [ PLC CONFIG ] \n`,
+      this.plcConfig,
+    );
+
     this.encoderVal = 0;
     return this.plcConfig;
   };
 
   public initSoftEncoder = () => {
     setTimeout(() => this.initSoftEncoder(), 100);
+    this.index++;
     if (this.systemInfo.plcData.conveyorStatus) {
       this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 10;
-      this.index++;
     }
     if (this.index == 100) {
       this.index = 0;
-      return console.log('ten sec log : ', Math.floor(this.encoderVal));
+      return console.log(
+        `[${new Date().toLocaleString()}] [ ENCODER LOG ] : `,
+        Math.floor(this.encoderVal),
+      );
     }
   };
 
@@ -165,7 +173,7 @@ export class SystemInfoService {
     if (data.blockReady === undefined) return;
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       this.systemInfo.plcData = data;
-      console.log('change :', data);
+      console.log(`[${new Date().toLocaleString()}] [ STATE CHANGE ] : `, data);
       if (this.systemInfo.plcData.loadRequest === 1) {
         this.loadPlcConfig();
       }
@@ -175,7 +183,7 @@ export class SystemInfoService {
   private onError = async (err) => {
     //send Post request
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-    console.log('ERROR Call Back:', err);
+    console.log(`[${new Date().toLocaleString()}] [ ERROR CALLBACK ] : `, err);
     // this.plcCommunicationService.initScan(
     //   this.systemConfigService.systemConfig.plcConnection.initDelay,
     // );

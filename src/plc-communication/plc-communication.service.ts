@@ -43,7 +43,9 @@ export class PlcCommunicationService {
           );
 
           this.initScanProcess();
-          console.log('\n CONNECTION INIT DONE\n');
+          console.log(
+            `[${new Date().toLocaleString()}] [ CONNECTION INIT DONE ] `,
+          );
 
           resolve();
         },
@@ -52,10 +54,10 @@ export class PlcCommunicationService {
   };
 
   public startScan = async () => {
-    if (this.queue.status != queueState.READY) {
-      return;
-    }
     try {
+      if (this.queue.status != queueState.READY) {
+        return;
+      }
       if (this.queue.buffer.length == 0) {
         await this.readFromPlc();
         return this.startScan();
@@ -91,6 +93,7 @@ export class PlcCommunicationService {
   public initScanProcess = async () => {
     this.queue.buffer = [];
     this.queue.status = queueState.READY;
+    console.log(`[${new Date().toLocaleString()}] [ INIT SCAN ] `);
     return;
   };
 
@@ -174,6 +177,7 @@ export class PlcCommunicationService {
     this.queue.status = queueState.ERROR;
     if (typeof err !== 'undefined') {
       this.plcEvent.emit('System_Error', err);
+      console.log(`[ ERROR LOG ] [${new Date().toLocaleString()}] : `, err);
     }
   };
 }
