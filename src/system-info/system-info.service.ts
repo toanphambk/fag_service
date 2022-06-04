@@ -99,12 +99,12 @@ export class SystemInfoService {
   };
 
   public initSoftEncoder = () => {
-    setTimeout(() => this.initSoftEncoder(), 100);
+    setTimeout(() => this.initSoftEncoder(), 10);
     this.index++;
-    if (this.systemInfo.plcData.conveyorStatus) {
-      this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 10;
+    if (this.systemInfo.plcData.conveyorSpeed) {
+      this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
     }
-    if (this.index == 100) {
+    if (this.index == 1000) {
       this.index = 0;
       return console.log(
         `[${new Date().toLocaleString()}] [ ENCODER LOG ] : `,
@@ -160,7 +160,8 @@ export class SystemInfoService {
     )
       return;
 
-    if (this.encoderVal == this.systemInfo.plcData.softEncoderValue) return;
+    if (Math.floor(this.encoderVal) == this.systemInfo.plcData.softEncoderValue)
+      return;
 
     this.plcCommunicationService.writeToPLC(
       ['softEncoderValue'],
