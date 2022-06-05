@@ -74,9 +74,9 @@ export class SystemInfoService {
 
     this.initSoftEncoder();
 
-    setInterval(() => {
-      this.softEncoderTranfer();
-    }, 200);
+    // setInterval(() => {
+    //   this.softEncoderTranfer();
+    // }, 200);
   };
 
   public loadPlcConfig = async () => {
