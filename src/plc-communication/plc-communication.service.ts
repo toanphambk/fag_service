@@ -138,7 +138,7 @@ export class PlcCommunicationService {
       });
       this.plcEvent.once(_uuid, (data) => {
         this.plcEvent.removeAllListeners(_uuid);
-        resolve();
+        resolve(data);
       });
     });
   };
