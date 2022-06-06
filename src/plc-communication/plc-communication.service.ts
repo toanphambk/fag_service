@@ -79,7 +79,7 @@ export class PlcCommunicationService {
               this.queue.buffer[0].uuid,
               await this.readFromPlc(),
             );
-            resolve(await this.readFromPlc());
+            resolve();
           },
         );
       });
@@ -137,7 +137,8 @@ export class PlcCommunicationService {
         uuid: _uuid,
       });
       this.plcEvent.once(_uuid, (data) => {
-        resolve(data);
+        this.plcEvent.removeAllListeners(_uuid);
+        resolve();
       });
     });
   };

@@ -8,14 +8,22 @@ import {
   serverState,
 } from '../Interface/plcData.interface';
 import { SystemConfigService } from '../system-config/system-config.service';
+import { HttpService } from '@nestjs/axios';
+import { Observable } from 'rxjs';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class SystemInfoService {
   constructor(
     private plcCommunicationService: PlcCommunicationService,
     private systemConfigService: SystemConfigService,
+    private httpService: HttpService,
   ) {
     this.initSystem();
+  }
+
+  testHttp(): Observable<AxiosResponse<any>> {
+    return this.httpService.get('http://localhost:3000/cats');
   }
 
   public encoderVal = 0;
@@ -53,7 +61,6 @@ export class SystemInfoService {
     await this.plcCommunicationService.initConnection(
       this.systemConfigService.systemConfig.dataBlock,
     );
-    this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
     this.plcCommunicationService.startScan();
 
     this.plcCommunicationService.plcEvent.on('Plc_Read_Callback', (plcData) => {
