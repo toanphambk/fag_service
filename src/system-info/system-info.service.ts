@@ -87,9 +87,9 @@ export class SystemInfoService {
 
       this.initSoftEncoder();
 
-      // setInterval(() => {
-      //   this.softEncoderTranfer();
-      // }, 200);
+      setInterval(() => {
+        this.softEncoderTranfer();
+      }, 200);
     } catch (error) {
       this.onError(error);
     }
