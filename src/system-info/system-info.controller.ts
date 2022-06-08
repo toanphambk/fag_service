@@ -22,4 +22,9 @@ export class SystemInfoController {
   loadPlcConfig() {
     return this.systemInfoService.loadPlcConfig();
   }
+
+  @Get('testHttp')
+  testHttp() {
+    return this.systemInfoService.testHttp();
+  }
 }

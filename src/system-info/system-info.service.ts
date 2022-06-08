@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PlcCommunicationService } from '../plc-communication/plc-communication.service';
 import { addCarDto } from './dto/carInfo.dto';
 import { conveyorState, SystemInfo } from '../Interface/systemInfo.interface';
@@ -9,7 +9,7 @@ import {
 } from '../Interface/plcData.interface';
 import { SystemConfigService } from '../system-config/system-config.service';
 import { HttpService } from '@nestjs/axios';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { AxiosResponse } from 'axios';
 
 @Injectable()
@@ -23,7 +23,9 @@ export class SystemInfoService {
   }
 
   testHttp(): Observable<AxiosResponse<any>> {
-    return this.httpService.get('http://localhost:3000/cats');
+    return this.httpService
+      .get('http://localhost:3000/system-config/')
+      .pipe(map((response) => response.data));
   }
 
   public encoderVal = 0;
@@ -58,32 +60,39 @@ export class SystemInfoService {
   private index = 0;
 
   private initSystem = async () => {
-    await this.plcCommunicationService.initConnection(
-      this.systemConfigService.systemConfig.dataBlock,
-    );
-    this.plcCommunicationService.startScan();
+    try {
+      await this.plcCommunicationService.initConnection(
+        this.systemConfigService.systemConfig.dataBlock,
+      );
+      this.plcCommunicationService.startScan();
 
-    this.plcCommunicationService.plcEvent.on('Plc_Read_Callback', (plcData) => {
-      this.onPlcRead(plcData);
-    });
+      this.plcCommunicationService.plcEvent.on(
+        'Plc_Read_Callback',
+        (plcData) => {
+          this.onPlcRead(plcData);
+        },
+      );
 
-    this.plcCommunicationService.plcEvent.on('System_Error', (err) => {
-      this.onError(err);
-    });
+      this.plcCommunicationService.plcEvent.on('System_Error', (err) => {
+        this.onError(err);
+      });
 
-    this.plcCommunicationService.plcEvent.on('Ipc_Ready', () => {
-      this.onIpcReady();
-    });
+      this.plcCommunicationService.plcEvent.on('Ipc_Ready', () => {
+        this.onIpcReady();
+      });
 
-    this.plcCommunicationService.plcEvent.on('Ipc_Init', () => {
-      this.onIpcInit();
-    });
+      this.plcCommunicationService.plcEvent.on('Ipc_Init', () => {
+        this.onIpcInit();
+      });
 
-    this.initSoftEncoder();
+      this.initSoftEncoder();
 
-    setInterval(() => {
-      this.softEncoderTranfer();
-    }, 200);
+      // setInterval(() => {
+      //   this.softEncoderTranfer();
+      // }, 200);
+    } catch (error) {
+      this.onError(error);
+    }
   };
 
   public loadPlcConfig = async () => {
@@ -96,10 +105,7 @@ export class SystemInfoService {
     this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
     this.plcCommunicationService.startScan();
     this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
-    console.log(
-      `[${new Date().toLocaleString()}] [ PLC CONFIG ] \n`,
-      this.plcConfig,
-    );
+    Logger.log(`[ PLC CONFIG ] \n` + JSON.stringify(this.plcConfig, null, 2));
 
     this.encoderVal = 0;
     return this.plcConfig;
@@ -113,10 +119,7 @@ export class SystemInfoService {
     }
     if (this.index == 1000) {
       this.index = 0;
-      return console.log(
-        `[${new Date().toLocaleString()}] [ ENCODER LOG ] : `,
-        Math.floor(this.encoderVal),
-      );
+      return Logger.log(`[ ENCODER LOG ] : ` + Math.floor(this.encoderVal));
     }
   };
 
@@ -145,7 +148,14 @@ export class SystemInfoService {
         0,
       ],
     );
+    const _ = {
+      vinVum: carInfo.VINNum.toUpperCase(),
+      vehicleCode: carInfo.vehicleCode.toUpperCase(),
+      vehicleColor: carInfo.vehicleColor.toUpperCase(),
+      setingIndex: index == -1 ? 0 : index,
+    };
 
+    Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
     return {
       source: 'data received',
       description: carInfo,
@@ -181,7 +191,7 @@ export class SystemInfoService {
     if (data.blockReady === undefined) return;
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       this.systemInfo.plcData = data;
-      console.log(`[${new Date().toLocaleString()}] [ STATE CHANGE ] : `, data);
+      Logger.log(`[ STATE CHANGE ] : \n ` + JSON.stringify(data, null, 2));
       if (this.systemInfo.plcData.loadRequest === 1) {
         this.loadPlcConfig();
       }
@@ -191,7 +201,7 @@ export class SystemInfoService {
   private onError = async (err) => {
     //send Post request
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-    console.log(`[${new Date().toLocaleString()}] [ ERROR CALLBACK ] : `, err);
+    Logger.error(`[ ERROR LOG ] : ${JSON.stringify(err, null, 2)} `);
     // this.plcCommunicationService.initScan(
     //   this.systemConfigService.systemConfig.plcConnection.initDelay,
     // );
@@ -214,7 +224,7 @@ export class SystemInfoService {
     }, 200);
     setTimeout(() => {
       if (!this.systemInfo.plcData.blockReady) {
-        return console.log('block busy');
+        return Logger.log('block busy');
       }
       const _carInfo = {
         vehicleCode: `v${this.index}`,

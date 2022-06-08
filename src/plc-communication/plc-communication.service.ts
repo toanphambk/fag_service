@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import events from 'events';
 import nodes7 from 'nodes7';
 import { SystemConfigService } from '../system-config/system-config.service';
@@ -18,6 +18,7 @@ export class PlcCommunicationService {
   };
 
   public initConnection = (setting) => {
+    Logger.log(`[ INIT CONNECTION ] : \n ${JSON.stringify(setting, null, 2)} `);
     return new Promise<void>((resolve, reject) => {
       this.conn.initiateConnection(
         {
@@ -43,9 +44,7 @@ export class PlcCommunicationService {
           );
 
           this.initScanProcess();
-          console.log(
-            `[${new Date().toLocaleString()}] [ CONNECTION INIT DONE ] `,
-          );
+          Logger.log(`[ CONNECTION INIT DONE ] `);
 
           resolve();
         },
@@ -93,7 +92,7 @@ export class PlcCommunicationService {
   public initScanProcess = async () => {
     this.queue.buffer = [];
     this.queue.status = queueState.READY;
-    console.log(`[${new Date().toLocaleString()}] [ INIT SCAN ] `);
+    Logger.log(`[ INIT SCAN ] `);
     return;
   };
 
@@ -136,8 +135,10 @@ export class PlcCommunicationService {
         data: data,
         uuid: _uuid,
       });
+      Logger.log(`[ WRITE TO PLC ]  : ${blockName} = ${data} `);
       this.plcEvent.once(_uuid, (data) => {
         this.plcEvent.removeAllListeners(_uuid);
+
         resolve(data);
       });
     });
@@ -178,7 +179,7 @@ export class PlcCommunicationService {
     this.queue.status = queueState.ERROR;
     if (typeof err !== 'undefined') {
       this.plcEvent.emit('System_Error', err);
-      console.log(`[ ERROR LOG ] [${new Date().toLocaleString()}] : `, err);
+      return;
     }
   };
 }
