@@ -29,7 +29,8 @@ export class PlcCommunicationService {
         },
         (err) => {
           if (typeof err !== 'undefined') {
-            reject(this.errorCallback(err));
+            this.errorCallback('Connection Erro');
+            reject();
             return;
           }
 
@@ -71,7 +72,8 @@ export class PlcCommunicationService {
           this.queue.buffer[0].data,
           async (err) => {
             if (err) {
-              reject(this.errorCallback(err));
+              this.errorCallback('Write to plc error');
+              reject();
               return;
             }
             this.plcEvent.emit(
@@ -138,7 +140,6 @@ export class PlcCommunicationService {
       Logger.log(`[ WRITE TO PLC ]  : ${blockName} = ${data} `);
       this.plcEvent.once(_uuid, (data) => {
         this.plcEvent.removeAllListeners(_uuid);
-
         resolve(data);
       });
     });
@@ -148,8 +149,8 @@ export class PlcCommunicationService {
     return new Promise<any>((resolve, reject) => {
       this.conn.readAllItems((err, data) => {
         if (err) {
-          this.errorCallback(err);
-          reject(err);
+          this.errorCallback('Read from plc error');
+          reject();
           return;
         }
         this.plcEvent.emit('Plc_Read_Callback', data);
@@ -177,9 +178,7 @@ export class PlcCommunicationService {
 
   private errorCallback = (err) => {
     this.queue.status = queueState.ERROR;
-    if (typeof err !== 'undefined') {
-      this.plcEvent.emit('System_Error', err);
-      return;
-    }
+    console.log(err);
+    this.plcEvent.emit('System_Error', err);
   };
 }

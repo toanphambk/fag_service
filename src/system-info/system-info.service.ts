@@ -96,7 +96,6 @@ export class SystemInfoService {
   };
 
   public loadPlcConfig = async () => {
-    // this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
     this.systemInfo.plcData.conveyorStatus = false;
     this.plcConfig = await this.plcCommunicationService.loadConfig();
     await this.plcCommunicationService.addItem(
@@ -117,7 +116,7 @@ export class SystemInfoService {
     if (this.systemInfo.plcData.conveyorSpeed) {
       this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
     }
-    if (this.index == 1000) {
+    if (this.index == 200) {
       this.index = 0;
       return Logger.log(`[ ENCODER LOG ] : ` + Math.floor(this.encoderVal));
     }
@@ -198,7 +197,7 @@ export class SystemInfoService {
     }
   };
 
-  private onError = async (err) => {
+  private onError = (err) => {
     //send Post request
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
     Logger.error(`[ ERROR LOG ] : ${JSON.stringify(err, null, 2)} `);
@@ -209,10 +208,12 @@ export class SystemInfoService {
 
   private onIpcInit = () => {
     this.systemInfo.systemData.ipcInfo = serverState.INIT;
+    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
   };
 
   private onIpcReady = () => {
     this.systemInfo.systemData.ipcInfo = serverState.READY;
+    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.READY]);
   };
 
   public startTest = async () => {
