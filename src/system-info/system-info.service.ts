@@ -87,9 +87,9 @@ export class SystemInfoService {
 
       this.initSoftEncoder();
 
-      setInterval(() => {
-        this.softEncoderTranfer();
-      }, 200);
+      this.softEncoderTranfer();
+
+      this.ipcClockTrander();
     } catch (error) {
       this.onError(error);
     }
@@ -170,6 +170,9 @@ export class SystemInfoService {
   };
 
   private softEncoderTranfer = () => {
+    setTimeout(() => {
+      this.softEncoderTranfer();
+    }, 200);
     if (
       this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
       this.systemInfo.systemData.ipcInfo == serverState.INIT
@@ -194,6 +197,19 @@ export class SystemInfoService {
       if (this.systemInfo.plcData.loadRequest === 1) {
         this.loadPlcConfig();
       }
+    }
+  };
+
+  private ipcClockTrander = () => {
+    setTimeout(() => {
+      this.ipcClockTrander();
+    }, 1000);
+
+    if (this.systemInfo.systemData.ipcInfo == serverState.READY) {
+      this.plcCommunicationService.writeToPLC(
+        ['ipcClock'],
+        [!this.systemInfo.plcData.ipcClock],
+      );
     }
   };
 

@@ -10,7 +10,6 @@ export class PlcCommunicationService {
   public plcEvent = new events.EventEmitter();
   public configBlock = {};
 
-  private dataBlock = this.systemConfigService.systemConfig.dataBlock;
   private conn = new nodes7();
   private queue = {
     status: queueState.INIT,
@@ -34,6 +33,8 @@ export class PlcCommunicationService {
             return;
           }
 
+          console.log(setting);
+
           this.conn.setTranslationCB((tag) => {
             return setting[tag];
           });
@@ -43,7 +44,6 @@ export class PlcCommunicationService {
               return key;
             }),
           );
-
           this.initScanProcess();
           Logger.log(`[ CONNECTION INIT DONE ] `);
 
@@ -139,7 +139,6 @@ export class PlcCommunicationService {
       });
       Logger.log(`[ WRITE TO PLC ]  : ${blockName} = ${data} `);
       this.plcEvent.once(_uuid, (data) => {
-        console.log(_uuid);
         resolve(data);
       });
     });
