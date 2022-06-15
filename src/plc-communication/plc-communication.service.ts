@@ -139,7 +139,7 @@ export class PlcCommunicationService {
       });
       Logger.log(`[ WRITE TO PLC ]  : ${blockName} = ${data} `);
       this.plcEvent.once(_uuid, (data) => {
-        this.plcEvent.removeAllListeners(_uuid);
+        console.log(_uuid);
         resolve(data);
       });
     });
