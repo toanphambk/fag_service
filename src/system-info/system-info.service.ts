@@ -211,10 +211,7 @@ export class SystemInfoService {
       this.ipcClockTrander();
     }, 1000);
 
-    if (
-      this.systemInfo.systemData.ipcInfo == serverState.READY &&
-      !this.systemConfigService.systemConfig.app.test
-    ) {
+    if (this.systemInfo.systemData.ipcInfo == serverState.READY) {
       this.plcCommunicationService.writeToPLC(
         ['ipcClock'],
         [!this.systemInfo.plcData.ipcClock],
