@@ -96,18 +96,24 @@ export class SystemInfoService {
   };
 
   public loadPlcConfig = async () => {
-    this.systemInfo.plcData.conveyorStatus = false;
-    this.plcConfig = await this.plcCommunicationService.loadConfig();
-    await this.plcCommunicationService.addItem(
-      this.systemConfigService.systemConfig.dataBlock,
-    );
-    this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
-    this.plcCommunicationService.startScan();
-    this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
-    Logger.log(`[ PLC CONFIG ] \n` + JSON.stringify(this.plcConfig, null, 2));
-
-    this.encoderVal = 0;
-    return this.plcConfig;
+    try {
+      this.systemInfo.plcData.conveyorStatus = false;
+      this.plcConfig = await this.plcCommunicationService.loadConfig();
+      await this.plcCommunicationService.addItem(
+        this.systemConfigService.systemConfig.dataBlock,
+      );
+      this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
+      this.plcCommunicationService.startScan();
+      this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
+      Logger.log(`[ PLC CONFIG ] \n` + JSON.stringify(this.plcConfig, null, 2));
+      this.encoderVal = 0;
+      return this.plcConfig;
+    } catch (error) {
+      this.plcCommunicationService.plcEvent.emit(
+        'System_Error',
+        'Load Config Error',
+      );
+    }
   };
 
   public initSoftEncoder = () => {

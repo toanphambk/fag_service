@@ -28,7 +28,8 @@ export class PlcCommunicationService {
         },
         (err) => {
           if (typeof err !== 'undefined') {
-            this.errorCallback('Connection Erro');
+            console.log(err);
+            this.errorCallback('Connection Error');
             reject();
             return;
           }
@@ -73,6 +74,7 @@ export class PlcCommunicationService {
           async (err) => {
             if (err) {
               this.errorCallback('Write to plc error');
+              console.log(err);
               reject();
               return;
             }
@@ -85,9 +87,12 @@ export class PlcCommunicationService {
         );
       });
       this.queue.buffer.shift();
-      return this.startScan();
+      this.startScan();
     } catch (error) {
-      this.errorCallback(error);
+      this.errorCallback('Cycle Scan Error');
+      setTimeout(() => {
+        this.startScan();
+      }, 1000);
     }
   };
 
@@ -125,7 +130,7 @@ export class PlcCommunicationService {
       this.queue.buffer = [];
       return _plcConfig;
     } catch (error) {
-      this.errorCallback(error);
+      this.errorCallback('Load Config Error');
     }
   };
 
@@ -176,8 +181,6 @@ export class PlcCommunicationService {
   };
 
   private errorCallback = (err) => {
-    this.queue.status = queueState.ERROR;
-    console.log(err);
     this.plcEvent.emit('System_Error', err);
   };
 }
