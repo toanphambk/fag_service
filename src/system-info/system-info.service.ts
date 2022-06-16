@@ -20,6 +20,7 @@ export class SystemInfoService {
     private httpService: HttpService,
   ) {
     this.initSystem();
+    this.plcCommunicationService.plcEvent.emit('Ipc_Init');
   }
 
   testHttp(): Observable<AxiosResponse<any>> {
@@ -198,8 +199,22 @@ export class SystemInfoService {
     //update plcdata if change
     if (data.blockReady === undefined) return;
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
+      const _change = Object.keys(data)
+        .filter((key) => {
+          if (key !== 'ipcClock') {
+            return data[key] != this.systemInfo.plcData[key];
+          }
+        })
+        .reduce((obj, key) => {
+          return Object.assign(obj, {
+            [key]: data[key],
+          });
+        }, {});
       this.systemInfo.plcData = data;
-      Logger.log(`[ STATE CHANGE ] : \n ` + JSON.stringify(data, null, 2));
+      if (JSON.stringify(_change) !== '{}') {
+        Logger.log(`[ STATE CHANGE ] :\n ` + JSON.stringify(_change, null, 2));
+      }
+
       if (this.systemInfo.plcData.loadRequest === 1) {
         this.loadPlcConfig();
       }
@@ -215,6 +230,7 @@ export class SystemInfoService {
       this.plcCommunicationService.writeToPLC(
         ['ipcClock'],
         [!this.systemInfo.plcData.ipcClock],
+        false,
       );
     }
   };

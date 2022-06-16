@@ -134,7 +134,7 @@ export class PlcCommunicationService {
     }
   };
 
-  public writeToPLC = (blockName: string[], data: any[]) => {
+  public writeToPLC = (blockName: string[], data: any[], log = true) => {
     return new Promise<void>((resolve) => {
       const _uuid = uuidv4();
       this.queue.buffer.push({
@@ -142,7 +142,7 @@ export class PlcCommunicationService {
         data: data,
         uuid: _uuid,
       });
-      Logger.log(`[ WRITE TO PLC ]  : ${blockName} = ${data} `);
+      if (log) Logger.log(`[ WRITE TO PLC ]  : ${blockName} = ${data} `);
       this.plcEvent.once(_uuid, (data) => {
         resolve(data);
       });
