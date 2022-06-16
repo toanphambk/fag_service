@@ -106,7 +106,12 @@ export class SystemInfoService {
       this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
       this.plcCommunicationService.startScan();
       this.plcCommunicationService.plcEvent.emit('Ipc_Ready');
-      Logger.log(`[ PLC CONFIG ] \n` + JSON.stringify(this.plcConfig, null, 2));
+      let _temp = '';
+      this.plcConfig.forEach((setting, index) => {
+        if (!index) return;
+        _temp += `[ Setting No ${index} ] : ${setting.vehicleCode}\n`;
+      });
+      Logger.log(`[ PLC CONFIG ] \n` + _temp);
       this.encoderVal = 0;
       return this.plcConfig;
     } catch (error) {
@@ -123,7 +128,7 @@ export class SystemInfoService {
     if (this.systemInfo.plcData.conveyorSpeed) {
       this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
     }
-    if (this.index == 200) {
+    if (this.index == 6000) {
       this.index = 0;
       return Logger.log(`[ ENCODER LOG ] : ` + Math.floor(this.encoderVal));
     }
@@ -192,6 +197,7 @@ export class SystemInfoService {
     this.plcCommunicationService.writeToPLC(
       ['softEncoderValue'],
       [this.encoderVal],
+      false,
     );
   };
 
@@ -212,7 +218,9 @@ export class SystemInfoService {
         }, {});
       this.systemInfo.plcData = data;
       if (JSON.stringify(_change) !== '{}') {
-        Logger.log(`[ STATE CHANGE ] :\n ` + JSON.stringify(_change, null, 2));
+        Logger.log(
+          `[ STATE CHANGE ] :\n` + JSON.stringify(_change, null, 2) + '\n',
+        );
       }
 
       if (this.systemInfo.plcData.loadRequest === 1) {

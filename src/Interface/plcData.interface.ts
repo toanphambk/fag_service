@@ -24,7 +24,6 @@ export enum plcState {
   AUTO = 2,
   MAUNAL = 3,
   ERROR = 4,
-  DIAGNOSTIC = 5,
 }
 
 export enum plcError {

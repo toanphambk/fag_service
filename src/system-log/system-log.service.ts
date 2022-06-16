@@ -35,6 +35,18 @@ export class SystemLogService extends ConsoleLogger {
         `[${new Date().toLocaleString()}] ` + message + '\n',
       );
     }
+    if (message.includes('[ WRITE TO PLC ]')) {
+      appendFileSync(
+        path.resolve('./dist/log/write_to_plc.log'),
+        `[${new Date().toLocaleString()}] ` + message + '\n',
+      );
+    }
+    if (message.includes('[ STATE CHANGE ]')) {
+      appendFileSync(
+        path.resolve('./dist/log/state_change.log'),
+        `[${new Date().toLocaleString()}] ` + message + '\n',
+      );
+    }
     if (message.includes('[ NEW CAR ]')) {
       appendFileSync(
         path.resolve('./dist/log/car-log.log'),

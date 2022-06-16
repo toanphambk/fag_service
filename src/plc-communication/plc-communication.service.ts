@@ -142,7 +142,7 @@ export class PlcCommunicationService {
         data: data,
         uuid: _uuid,
       });
-      if (log) Logger.log(`[ WRITE TO PLC ]  : ${blockName} = ${data} `);
+      if (log) Logger.log(`[ WRITE TO PLC ]  : [ ${blockName} ] = ${data} `);
       this.plcEvent.once(_uuid, (data) => {
         resolve(data);
       });
