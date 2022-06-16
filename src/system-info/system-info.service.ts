@@ -154,7 +154,8 @@ export class SystemInfoService {
       [
         carInfo.VINNum.toUpperCase(),
         carInfo.vehicleCode.toUpperCase(),
-        carInfo.vehicleColor.toUpperCase(),
+        // carInfo.vehicleColor.toUpperCase(),
+        'WHIT',
         index == -1 ? 0 : index,
         0,
       ],
