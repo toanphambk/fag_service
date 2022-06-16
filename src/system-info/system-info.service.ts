@@ -207,16 +207,15 @@ export class SystemInfoService {
   };
 
   private ipcClockTrander = () => {
-    setTimeout(() => {
-      this.ipcClockTrander();
-    }, 1000);
-
     if (this.systemInfo.systemData.ipcInfo == serverState.READY) {
       this.plcCommunicationService.writeToPLC(
         ['ipcClock'],
         [!this.systemInfo.plcData.ipcClock],
       );
     }
+    setTimeout(() => {
+      this.ipcClockTrander();
+    }, 1000);
   };
 
   private onError = (err) => {
