@@ -59,7 +59,7 @@ export class SystemInfoService {
   };
 
   private index = 0;
-
+  private carQueue: { detectedPos: number; carInfo: addCarDto }[] = [];
   private initSystem = async () => {
     try {
       await this.plcCommunicationService.initConnection(
@@ -125,6 +125,9 @@ export class SystemInfoService {
   public initSoftEncoder = () => {
     setTimeout(() => this.initSoftEncoder(), 10);
     this.index++;
+    this.carQueueUpdate();
+    console.log(this.carQueue);
+
     if (this.systemInfo.plcData.conveyorSpeed) {
       this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
     }
@@ -135,14 +138,22 @@ export class SystemInfoService {
   };
 
   public addCar = async (carInfo: addCarDto) => {
+    const _detectedPos = this.encoderVal;
+    if (this.carQueue.find((_car) => _car.carInfo == carInfo)) {
+      const _error = {
+        Error: 'Car Info Write Error',
+        Desscription: 'Dupplicate Car Info',
+      };
+      throw _error;
+    }
     if (!this.systemInfo.plcData.blockReady) {
       const _error = {
-        source: 'Plc Block Ready Error',
-        description: 'Car Info Write Error',
+        Error: 'Car Info Write Error',
+        Desscription: 'Plc Block Ready Error',
       };
       this.systemInfo.systemData.ipcInfo = serverState.ERROR;
       this.plcCommunicationService.plcEvent.emit('System_Error', _error);
-      return _error;
+      throw _error;
     }
 
     const index = this.plcConfig.findIndex(
@@ -165,7 +176,7 @@ export class SystemInfoService {
       vehicleColor: carInfo.vehicleColor.toUpperCase(),
       setingIndex: index == -1 ? 0 : index,
     };
-
+    this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
     return {
       source: 'data received',
@@ -181,6 +192,35 @@ export class SystemInfoService {
     return _data;
   };
 
+  public startTest = async () => {
+    setTimeout(() => {
+      this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
+    }, 100);
+    setTimeout(() => {
+      this.plcCommunicationService.writeToPLC(['lbTrigger'], [false]);
+    }, 200);
+    setTimeout(() => {
+      if (!this.systemInfo.plcData.blockReady) {
+        return Logger.log('block busy');
+      }
+      const _carInfo = {
+        vehicleCode: `v${this.index}`,
+        vehicleColor: `r${this.index}`,
+        VINNum: `test${this.index}`,
+      };
+      this.index++;
+      return this.addCar(_carInfo);
+    }, 1000);
+    setTimeout(() => {
+      this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
+    }, 1000);
+  };
+
+  private carQueueUpdate = () => {
+    this.carQueue = this.carQueue.filter((e) => {
+      return this.encoderVal - e.detectedPos < 9000;
+    });
+  };
   private softEncoderTranfer = () => {
     setTimeout(() => {
       this.softEncoderTranfer();
@@ -260,29 +300,5 @@ export class SystemInfoService {
   private onIpcReady = () => {
     this.systemInfo.systemData.ipcInfo = serverState.READY;
     this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.READY]);
-  };
-
-  public startTest = async () => {
-    setTimeout(() => {
-      this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
-    }, 100);
-    setTimeout(() => {
-      this.plcCommunicationService.writeToPLC(['lbTrigger'], [false]);
-    }, 200);
-    setTimeout(() => {
-      if (!this.systemInfo.plcData.blockReady) {
-        return Logger.log('block busy');
-      }
-      const _carInfo = {
-        vehicleCode: `v${this.index}`,
-        vehicleColor: `r${this.index}`,
-        VINNum: `test${this.index}`,
-      };
-      this.index++;
-      return this.addCar(_carInfo);
-    }, 1000);
-    setTimeout(() => {
-      this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
-    }, 1000);
   };
 }
