@@ -6,10 +6,9 @@
         "blockReady": "DB8,INT24.1",
         "vehicleMode": "DB8,INT26.1",
         "conveyorStatus": "DB8,X28.0",
-        "loadRequest" : "DB8,INT30.1",
-        "conveyorSpeed":"DB8,REAL32",
+        "loadRequest": "DB8,INT30.1",
+        "conveyorSpeed": "DB8,REAL32",
         "softEncoderValue": "DB8,DINT36.1",
-
         "ipcStatus": "DB1,INT0.1",
         "serverStatus": "DB1,INT2.1",
         "ipcClock": "DB1,X4.0",
@@ -21,9 +20,7 @@
         "ip": "192.168.1.50",
         "port": 102,
         "rack": 0,
-        "slot": 1,
-        "reconnectDelay": 2000,
-        "initDelay": 50
+        "slot": 1
     },
     "serverConnection": {
         "ip": "192.168.2.2",
@@ -35,6 +32,9 @@
     "app": {
         "port": 3000,
         "ip": "192.168.2.40",
-        "test": 1
+        "encoderTranferRate": 200,
+        "encoderSampleRate": 10,
+        "heartBeatFrequency": 1,
+        "test": true
     }
 }

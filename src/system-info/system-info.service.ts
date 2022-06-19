@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpStatus, HttpException } from '@nestjs/common';
 import { PlcCommunicationService } from '../plc-communication/plc-communication.service';
 import { addCarDto } from './dto/carInfo.dto';
 import { conveyorState, SystemInfo } from '../Interface/systemInfo.interface';
@@ -123,15 +123,22 @@ export class SystemInfoService {
   };
 
   public initSoftEncoder = () => {
-    setTimeout(() => this.initSoftEncoder(), 10);
+    setTimeout(
+      () => this.initSoftEncoder(),
+      this.systemConfigService.systemConfig.app.encoderSampleRate,
+    );
     this.index++;
     this.carQueueUpdate();
-    console.log(this.carQueue);
 
     if (this.systemInfo.plcData.conveyorSpeed) {
-      this.encoderVal += this.systemInfo.plcData.conveyorSpeed / 100;
+      this.encoderVal +=
+        this.systemInfo.plcData.conveyorSpeed /
+        (1000 / this.systemConfigService.systemConfig.app.encoderSampleRate);
     }
-    if (this.index == 6000) {
+    if (
+      this.index ==
+      60000 / this.systemConfigService.systemConfig.app.encoderSampleRate
+    ) {
       this.index = 0;
       return Logger.log(`[ ENCODER LOG ] : ` + Math.floor(this.encoderVal));
     }
@@ -139,13 +146,24 @@ export class SystemInfoService {
 
   public addCar = async (carInfo: addCarDto) => {
     const _detectedPos = this.encoderVal;
-    if (this.carQueue.find((_car) => _car.carInfo == carInfo)) {
+    if (
+      this.carQueue.find((_car) => _car.carInfo.VINNum == carInfo.VINNum) !=
+      undefined
+    ) {
       const _error = {
         Error: 'Car Info Write Error',
         Desscription: 'Dupplicate Car Info',
       };
-      throw _error;
+      this.plcCommunicationService.plcEvent.emit('System_Error', _error);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_ACCEPTABLE,
+          error: _error,
+        },
+        HttpStatus.NOT_ACCEPTABLE,
+      );
     }
+
     if (!this.systemInfo.plcData.blockReady) {
       const _error = {
         Error: 'Car Info Write Error',
@@ -153,7 +171,13 @@ export class SystemInfoService {
       };
       this.systemInfo.systemData.ipcInfo = serverState.ERROR;
       this.plcCommunicationService.plcEvent.emit('System_Error', _error);
-      throw _error;
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_ACCEPTABLE,
+          error: _error,
+        },
+        HttpStatus.NOT_ACCEPTABLE,
+      );
     }
 
     const index = this.plcConfig.findIndex(
@@ -170,14 +194,18 @@ export class SystemInfoService {
         0,
       ],
     );
+
     const _ = {
       vinVum: carInfo.VINNum.toUpperCase(),
       vehicleCode: carInfo.vehicleCode.toUpperCase(),
       vehicleColor: carInfo.vehicleColor.toUpperCase(),
       setingIndex: index == -1 ? 0 : index,
     };
+
     this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
+
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
+
     return {
       source: 'data received',
       description: carInfo,
@@ -221,10 +249,11 @@ export class SystemInfoService {
       return this.encoderVal - e.detectedPos < 9000;
     });
   };
+
   private softEncoderTranfer = () => {
     setTimeout(() => {
       this.softEncoderTranfer();
-    }, 200);
+    }, this.systemConfigService.systemConfig.app.encoderTranferRate);
     if (
       this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
       this.systemInfo.systemData.ipcInfo == serverState.INIT
@@ -241,9 +270,24 @@ export class SystemInfoService {
     );
   };
 
+  private ipcClockTrander = () => {
+    setTimeout(() => {
+      this.ipcClockTrander();
+    }, (1 / this.systemConfigService.systemConfig.app.heartBeatFrequency) * 1000);
+
+    if (this.systemInfo.systemData.ipcInfo == serverState.READY) {
+      this.plcCommunicationService.writeToPLC(
+        ['ipcClock'],
+        [!this.systemInfo.plcData.ipcClock],
+        false,
+      );
+    }
+  };
+
   private onPlcRead = (data) => {
     //update plcdata if change
     if (data.blockReady === undefined) return;
+
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       const _change = Object.keys(data)
         .filter((key) => {
@@ -256,29 +300,30 @@ export class SystemInfoService {
             [key]: data[key],
           });
         }, {});
+
       this.systemInfo.plcData = data;
+
       if (JSON.stringify(_change) !== '{}') {
         Logger.log(
           `[ STATE CHANGE ] :\n` + JSON.stringify(_change, null, 2) + '\n',
         );
-      }
-
-      if (this.systemInfo.plcData.loadRequest === 1) {
-        this.loadPlcConfig();
+        if (this.systemInfo.plcData.loadRequest === 1) {
+          this.loadPlcConfig();
+        }
+        // this.systemOnChange();
       }
     }
   };
 
-  private ipcClockTrander = () => {
-    setTimeout(() => {
-      this.ipcClockTrander();
-    }, 1000);
+  private systemOnChange = () => {
+    if (this.systemInfo.plcData.loadRequest === 1) {
+      this.loadPlcConfig();
+    }
 
-    if (this.systemInfo.systemData.ipcInfo == serverState.READY) {
+    if (this.systemInfo.plcData.ipcStatus === serverState.ERROR) {
       this.plcCommunicationService.writeToPLC(
-        ['ipcClock'],
-        [!this.systemInfo.plcData.ipcClock],
-        false,
+        ['ipcStatus'],
+        [serverState.ERROR],
       );
     }
   };
@@ -287,9 +332,6 @@ export class SystemInfoService {
     //send Post request
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
     Logger.error(`[ ERROR LOG ] : ${JSON.stringify(err, null, 2)} `);
-    // this.plcCommunicationService.initScan(
-    //   this.systemConfigService.systemConfig.plcConnection.initDelay,
-    // );
   };
 
   private onIpcInit = () => {

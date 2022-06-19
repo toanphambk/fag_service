@@ -6,9 +6,14 @@ import { addCarDto } from './dto/carInfo.dto';
 export class SystemInfoController {
   constructor(private systemInfoService: SystemInfoService) {}
   @Post('addCar')
-  addCar(@Body() carInfo: addCarDto) {
-    return this.systemInfoService.addCar(carInfo);
+  async addCar(@Body() carInfo: addCarDto) {
+    try {
+      return this.systemInfoService.addCar(carInfo);
+    } catch (error) {
+      throw error;
+    }
   }
+
   @Post('startTest')
   startTest() {
     return this.systemInfoService.startTest();

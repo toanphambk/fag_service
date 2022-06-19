@@ -11,7 +11,6 @@ export interface Config {
     softEncoderValue: string;
     conveyorRampUp: string;
     conveyorRampDown: string;
-
     ipcStatus: string;
     serverStatus: string;
     ipcClock: string;
@@ -24,8 +23,6 @@ export interface Config {
     port: number;
     rack: number;
     slot: number;
-    reconnectDelay: number;
-    initDelay: number;
   };
   serverConnection: {
     ip: string;
@@ -37,6 +34,9 @@ export interface Config {
   app: {
     port: number;
     ip: string;
-    test: number;
+    encoderTranferRate: number;
+    encoderSampleRate: number;
+    heartBeatFrequency: number;
+    test: boolean;
   };
 }
