@@ -11,7 +11,7 @@ import { SystemConfigService } from '../system-config/system-config.service';
 import { HttpService } from '@nestjs/axios';
 import { Observable, map } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import { WebSocketServer } from '@nestjs/websockets';
+
 @Injectable()
 export class SystemInfoService {
   constructor(
@@ -22,8 +22,6 @@ export class SystemInfoService {
     this.initSystem();
     this.plcCommunicationService.plcEvent.emit('Ipc_Init');
   }
-
-  @WebSocketServer() server;
 
   testHttp(): Observable<AxiosResponse<any>> {
     return this.httpService
@@ -204,14 +202,7 @@ export class SystemInfoService {
       setingIndex: index == -1 ? 0 : index,
     };
 
-    this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
-    this.server.emit(
-      'chat message',
-      `[${new Date().toLocaleString()}] ` +
-        '[ NEW CAR ] :' +
-        `${JSON.stringify(_, null, 2)}`,
-    );
-
+    // this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
 
     return {
