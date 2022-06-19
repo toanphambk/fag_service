@@ -11,7 +11,7 @@ import { SystemConfigService } from '../system-config/system-config.service';
 import { HttpService } from '@nestjs/axios';
 import { Observable, map } from 'rxjs';
 import { AxiosResponse } from 'axios';
-
+import { WebSocketServer } from '@nestjs/websockets';
 @Injectable()
 export class SystemInfoService {
   constructor(
@@ -22,6 +22,8 @@ export class SystemInfoService {
     this.initSystem();
     this.plcCommunicationService.plcEvent.emit('Ipc_Init');
   }
+
+  @WebSocketServer() server;
 
   testHttp(): Observable<AxiosResponse<any>> {
     return this.httpService
@@ -145,24 +147,24 @@ export class SystemInfoService {
   };
 
   public addCar = async (carInfo: addCarDto) => {
-    const _detectedPos = this.encoderVal;
-    if (
-      this.carQueue.find((_car) => _car.carInfo.VINNum == carInfo.VINNum) !=
-      undefined
-    ) {
-      const _error = {
-        Error: 'Car Info Write Error',
-        Desscription: 'Dupplicate Car Info',
-      };
-      this.plcCommunicationService.plcEvent.emit('System_Error', _error);
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_ACCEPTABLE,
-          error: _error,
-        },
-        HttpStatus.NOT_ACCEPTABLE,
-      );
-    }
+    // const _detectedPos = this.encoderVal;
+    // if (
+    //   this.carQueue.find((_car) => _car.carInfo.VINNum == carInfo.VINNum) !=
+    //   undefined
+    // ) {
+    //   const _error = {
+    //     Error: 'Car Info Write Error',
+    //     Desscription: { message: 'Dupplicate Car Info', carInfo: carInfo },
+    //   };
+    //   this.plcCommunicationService.plcEvent.emit('System_Error', _error);
+    //   throw new HttpException(
+    //     {
+    //       status: HttpStatus.NOT_ACCEPTABLE,
+    //       error: _error,
+    //     },
+    //     HttpStatus.NOT_ACCEPTABLE,
+    //   );
+    // }
 
     if (!this.systemInfo.plcData.blockReady) {
       const _error = {
@@ -203,6 +205,12 @@ export class SystemInfoService {
     };
 
     this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
+    this.server.emit(
+      'chat message',
+      `[${new Date().toLocaleString()}] ` +
+        '[ NEW CAR ] :' +
+        `${JSON.stringify(_, null, 2)}`,
+    );
 
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
 
@@ -307,10 +315,7 @@ export class SystemInfoService {
         Logger.log(
           `[ STATE CHANGE ] :\n` + JSON.stringify(_change, null, 2) + '\n',
         );
-        if (this.systemInfo.plcData.loadRequest === 1) {
-          this.loadPlcConfig();
-        }
-        // this.systemOnChange();
+        this.systemOnChange();
       }
     }
   };
@@ -319,7 +324,6 @@ export class SystemInfoService {
     if (this.systemInfo.plcData.loadRequest === 1) {
       this.loadPlcConfig();
     }
-
     if (this.systemInfo.plcData.ipcStatus === serverState.ERROR) {
       this.plcCommunicationService.writeToPLC(
         ['ipcStatus'],

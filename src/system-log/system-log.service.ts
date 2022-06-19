@@ -1,7 +1,13 @@
 import { ConsoleLogger } from '@nestjs/common';
 import path from 'path';
 import { appendFileSync, existsSync, mkdirSync } from 'fs';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class SystemLogService extends ConsoleLogger {
   constructor() {
     super();
@@ -9,49 +15,31 @@ export class SystemLogService extends ConsoleLogger {
       mkdirSync('./dist/log');
     }
   }
+
   error(message: any, stack?: string, context?: string) {
     super.error(message);
-    appendFileSync(
-      path.resolve('./dist/log/error.log'),
-      `[${new Date().toLocaleString()}] ` + message + '\n',
-    );
+    const msg = `[${new Date().toLocaleString()}] ` + message + '\n';
+    appendFileSync(path.resolve('./dist/log/error.log'), msg);
   }
 
   log(message: any, ...optionalParams: any[]) {
     super.log(message);
-    appendFileSync(
-      path.resolve('./dist/log/system-log.log'),
-      `[${new Date().toLocaleString()}] ` + message + '\n',
-    );
+    const msg = `[${new Date().toLocaleString()}] ` + message + '\n';
+    appendFileSync(path.resolve('./dist/log/system-log.log'), msg);
     if (message.includes('[ ENCODER LOG ]')) {
-      appendFileSync(
-        path.resolve('./dist/log/conveyor-log.log'),
-        `[${new Date().toLocaleString()}] ` + message + '\n',
-      );
+      appendFileSync(path.resolve('./dist/log/conveyor-log.log'), msg);
     }
     if (message.includes('[ PLC CONFIG ]')) {
-      appendFileSync(
-        path.resolve('./dist/log/plc-config-log.log'),
-        `[${new Date().toLocaleString()}] ` + message + '\n',
-      );
+      appendFileSync(path.resolve('./dist/log/plc-config-log.log'), msg);
     }
     if (message.includes('[ WRITE TO PLC ]')) {
-      appendFileSync(
-        path.resolve('./dist/log/write_to_plc.log'),
-        `[${new Date().toLocaleString()}] ` + message + '\n',
-      );
+      appendFileSync(path.resolve('./dist/log/write_to_plc.log'), msg);
     }
     if (message.includes('[ STATE CHANGE ]')) {
-      appendFileSync(
-        path.resolve('./dist/log/state_change.log'),
-        `[${new Date().toLocaleString()}] ` + message + '\n',
-      );
+      appendFileSync(path.resolve('./dist/log/state_change.log'), msg);
     }
     if (message.includes('[ NEW CAR ]')) {
-      appendFileSync(
-        path.resolve('./dist/log/car-log.log'),
-        `[${new Date().toLocaleString()}] ` + message + '\n',
-      );
+      appendFileSync(path.resolve('./dist/log/car-log.log'), msg);
     }
   }
 }
