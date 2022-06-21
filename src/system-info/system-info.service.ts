@@ -145,24 +145,24 @@ export class SystemInfoService {
   };
 
   public addCar = async (carInfo: addCarDto) => {
-    // const _detectedPos = this.encoderVal;
-    // if (
-    //   this.carQueue.find((_car) => _car.carInfo.VINNum == carInfo.VINNum) !=
-    //   undefined
-    // ) {
-    //   const _error = {
-    //     Error: 'Car Info Write Error',
-    //     Desscription: { message: 'Dupplicate Car Info', carInfo: carInfo },
-    //   };
-    //   this.plcCommunicationService.plcEvent.emit('System_Error', _error);
-    //   throw new HttpException(
-    //     {
-    //       status: HttpStatus.NOT_ACCEPTABLE,
-    //       error: _error,
-    //     },
-    //     HttpStatus.NOT_ACCEPTABLE,
-    //   );
-    // }
+    const _detectedPos = this.encoderVal;
+    if (
+      this.carQueue.find((_car) => _car.carInfo.VINNum == carInfo.VINNum) !=
+      undefined
+    ) {
+      const _error = {
+        Error: 'Car Info Write Error',
+        Desscription: { message: 'Dupplicate Car Info', carInfo: carInfo },
+      };
+      this.plcCommunicationService.plcEvent.emit('System_Error', _error);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_ACCEPTABLE,
+          error: _error,
+        },
+        HttpStatus.NOT_ACCEPTABLE,
+      );
+    }
 
     if (!this.systemInfo.plcData.blockReady) {
       const _error = {
@@ -187,7 +187,7 @@ export class SystemInfoService {
     await this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
       [
-        carInfo.VINNum.toUpperCase(),
+        carInfo.b64vin.toUpperCase(),
         carInfo.vehicleCode.toUpperCase(),
         carInfo.vehicleColor.toUpperCase(),
         index == -1 ? 0 : index,
@@ -197,14 +197,15 @@ export class SystemInfoService {
 
     const _ = {
       vinVum: carInfo.VINNum.toUpperCase(),
+      uuid: carInfo.b64vin.toUpperCase(),
       vehicleCode: carInfo.vehicleCode.toUpperCase(),
       vehicleColor: carInfo.vehicleColor.toUpperCase(),
       setingIndex: index == -1 ? 0 : index,
     };
 
-    // this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
+    this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
-
+    console.log(this.carQueue);
     return {
       source: 'data received',
       description: carInfo,
@@ -217,30 +218,6 @@ export class SystemInfoService {
       conveyorStatus: conveyorState[this.conveyorState],
     };
     return _data;
-  };
-
-  public startTest = async () => {
-    setTimeout(() => {
-      this.plcCommunicationService.writeToPLC(['lbTrigger'], [true]);
-    }, 100);
-    setTimeout(() => {
-      this.plcCommunicationService.writeToPLC(['lbTrigger'], [false]);
-    }, 200);
-    setTimeout(() => {
-      if (!this.systemInfo.plcData.blockReady) {
-        return Logger.log('block busy');
-      }
-      const _carInfo = {
-        vehicleCode: `v${this.index}`,
-        vehicleColor: `r${this.index}`,
-        VINNum: `test${this.index}`,
-      };
-      this.index++;
-      return this.addCar(_carInfo);
-    }, 1000);
-    setTimeout(() => {
-      this.plcCommunicationService.writeToPLC(['loadRequest'], [0]);
-    }, 1000);
   };
 
   private carQueueUpdate = () => {

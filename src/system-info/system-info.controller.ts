@@ -14,10 +14,6 @@ export class SystemInfoController {
     }
   }
 
-  @Post('startTest')
-  startTest() {
-    return this.systemInfoService.startTest();
-  }
   @Get('encoderVal')
   encoderVal() {
     return this.systemInfoService.eyeFlowEncoderLogger();
