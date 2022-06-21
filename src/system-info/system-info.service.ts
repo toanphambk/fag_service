@@ -197,7 +197,7 @@ export class SystemInfoService {
 
     const _ = {
       vinVum: carInfo.VINNum.toUpperCase(),
-      uuid: carInfo.b64vin.toUpperCase(),
+      uuid: carInfo.b64vin,
       vehicleCode: carInfo.vehicleCode.toUpperCase(),
       vehicleColor: carInfo.vehicleColor.toUpperCase(),
       setingIndex: index == -1 ? 0 : index,
