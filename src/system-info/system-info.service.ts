@@ -187,7 +187,7 @@ export class SystemInfoService {
     await this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
       [
-        carInfo.b64vin.toUpperCase(),
+        carInfo.b64vin,
         carInfo.vehicleCode.toUpperCase(),
         carInfo.vehicleColor.toUpperCase(),
         index == -1 ? 0 : index,
