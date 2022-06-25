@@ -1,6 +1,6 @@
 import { Injectable, Logger, HttpStatus, HttpException } from '@nestjs/common';
 import { PlcCommunicationService } from '../plc-communication/plc-communication.service';
-import { addCarDto } from './dto/carInfo.dto';
+import { addCarDto, addCarStatusEnum } from './dto/carInfo.dto';
 import { conveyorState, SystemInfo } from '../Interface/systemInfo.interface';
 import {
   plcState,
@@ -59,7 +59,15 @@ export class SystemInfoService {
   };
 
   private index = 0;
-  private carQueue: { detectedPos: number; carInfo: addCarDto }[] = [];
+  private carQueue: {
+    detectedPos: number;
+    carInfo: {
+      vehicleCode: string;
+      vehicleColor: string;
+      VINNum: string;
+      b64vin: string;
+    };
+  }[] = [];
   private initSystem = async () => {
     try {
       await this.plcCommunicationService.initConnection(
@@ -130,6 +138,10 @@ export class SystemInfoService {
     this.index++;
     this.carQueueUpdate();
 
+    this.conveyorState = this.systemInfo.plcData.conveyorSpeed
+      ? conveyorState.RUNNING
+      : conveyorState.STOP;
+
     if (this.systemInfo.plcData.conveyorSpeed) {
       this.encoderVal +=
         this.systemInfo.plcData.conveyorSpeed /
@@ -144,15 +156,33 @@ export class SystemInfoService {
     }
   };
 
-  public addCar = async (carInfo: addCarDto) => {
+  public addCar = async (carData: addCarDto) => {
+    if (carData.status == addCarStatusEnum.FAIL) {
+      const _error = {
+        Error: 'OCR Error',
+        Desscription: {
+          message: carData.data.description,
+          carData: carData.data.carInfo,
+        },
+      };
+      this.plcCommunicationService.plcEvent.emit('System_Error', _error);
+      return {
+        status: HttpStatus.OK,
+        error: _error,
+      };
+    }
     const _detectedPos = this.encoderVal;
     if (
-      this.carQueue.find((_car) => _car.carInfo.VINNum == carInfo.VINNum) !=
-      undefined
+      this.carQueue.find(
+        (_car) => _car.carInfo.VINNum == carData.data.carInfo.VINNum,
+      ) != undefined
     ) {
       const _error = {
         Error: 'Car Info Write Error',
-        Desscription: { message: 'Dupplicate Car Info', carInfo: carInfo },
+        Desscription: {
+          message: 'Dupplicate Car Info',
+          carData: carData.data,
+        },
       };
       this.plcCommunicationService.plcEvent.emit('System_Error', _error);
       throw new HttpException(
@@ -181,34 +211,37 @@ export class SystemInfoService {
     }
 
     const index = this.plcConfig.findIndex(
-      (e) => e.vehicleCode == carInfo.vehicleCode.toUpperCase(),
+      (e) => e.vehicleCode == carData.data.carInfo.vehicleCode.toUpperCase(),
     );
 
     await this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
       [
-        carInfo.b64vin,
-        carInfo.vehicleCode.toUpperCase(),
-        carInfo.vehicleColor.toUpperCase(),
+        carData.data.carInfo.b64vin,
+        carData.data.carInfo.vehicleCode.toUpperCase(),
+        carData.data.carInfo.vehicleColor.toUpperCase(),
         index == -1 ? 0 : index,
         0,
       ],
     );
 
     const _ = {
-      vinVum: carInfo.VINNum.toUpperCase(),
-      uuid: carInfo.b64vin,
-      vehicleCode: carInfo.vehicleCode.toUpperCase(),
-      vehicleColor: carInfo.vehicleColor.toUpperCase(),
+      vinVum: carData.data.carInfo.VINNum.toUpperCase(),
+      uuid: carData.data.carInfo.b64vin,
+      vehicleCode: carData.data.carInfo.vehicleCode.toUpperCase(),
+      vehicleColor: carData.data.carInfo.vehicleColor.toUpperCase(),
       setingIndex: index == -1 ? 0 : index,
     };
 
-    this.carQueue.push({ detectedPos: _detectedPos, carInfo: carInfo });
+    this.carQueue.push({
+      detectedPos: _detectedPos,
+      carInfo: carData.data.carInfo,
+    });
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
     console.log(this.carQueue);
     return {
       source: 'data received',
-      description: carInfo,
+      description: carData.data,
     };
   };
 
