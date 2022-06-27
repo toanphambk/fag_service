@@ -171,6 +171,7 @@ export class SystemInfoService {
         error: _error,
       };
     }
+
     const _detectedPos = this.encoderVal;
     if (
       this.carQueue.find(
@@ -274,7 +275,7 @@ export class SystemInfoService {
 
     this.plcCommunicationService.writeToPLC(
       ['softEncoderValue'],
-      [this.encoderVal],
+      [Math.floor(this.encoderVal)],
       false,
     );
   };
@@ -283,7 +284,11 @@ export class SystemInfoService {
     setTimeout(() => {
       this.ipcClockTrander();
     }, (1 / this.systemConfigService.systemConfig.app.heartBeatFrequency) * 1000);
-
+    if (
+      this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
+      this.systemInfo.systemData.ipcInfo == serverState.INIT
+    )
+      return;
     if (this.systemInfo.systemData.ipcInfo == serverState.READY) {
       this.plcCommunicationService.writeToPLC(
         ['ipcClock'],
