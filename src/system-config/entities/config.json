@@ -17,7 +17,7 @@
         "lbTrigger": "DB1,X18.0"
     },
     "plcConnection": {
-        "ip": "192.168.1.55",
+        "ip": "192.168.1.50",
         "port": 102,
         "rack": 0,
         "slot": 1
