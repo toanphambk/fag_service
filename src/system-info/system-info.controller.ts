@@ -13,7 +13,10 @@ export class SystemInfoController {
       throw error;
     }
   }
-
+  @Post('result')
+  async result(@Body() data) {
+    console.log(data);
+  }
   @Get('encoderVal')
   encoderVal() {
     return this.systemInfoService.eyeFlowEncoderLogger();

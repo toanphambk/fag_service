@@ -179,12 +179,14 @@ export class SystemInfoService {
       ) != undefined
     ) {
       const _error = {
-        Error: 'Car Info Write Error',
-        Desscription: {
+        error: 'Car Info Write Error',
+        desscription: {
           message: 'Dupplicate Car Info',
           carData: carData.data,
         },
       };
+
+      Logger.log('[ NEW CAR ERROR ] :' + `${JSON.stringify(_error, null, 2)}`);
       this.plcCommunicationService.plcEvent.emit('System_Error', _error);
       throw new HttpException(
         {
