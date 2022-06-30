@@ -41,5 +41,11 @@ export class SystemLogService extends ConsoleLogger {
     if (message.includes('[ NEW CAR ]')) {
       appendFileSync(path.resolve('./dist/log/car-log.log'), msg);
     }
+    if (message.includes('[ ENCODER LOG ]')) {
+      appendFileSync(path.resolve('./dist/log/conveyor-log.log'), msg);
+    }
+    if (message.includes('[ GET RESULT ]')) {
+      appendFileSync(path.resolve('./dist/log/result.log'), msg);
+    }
   }
 }

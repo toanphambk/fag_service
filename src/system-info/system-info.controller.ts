@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Logger } from '@nestjs/common';
 import { SystemInfoService } from './system-info.service';
 import { addCarDto } from './dto/carInfo.dto';
 
@@ -15,7 +15,7 @@ export class SystemInfoController {
   }
   @Post('result')
   async result(@Body() data) {
-    console.log(data);
+    Logger.log(` [ GET RESULT ] : ${data.id}`);
   }
   @Get('encoderVal')
   encoderVal() {
