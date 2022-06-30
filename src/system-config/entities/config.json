@@ -29,7 +29,7 @@
     },
     "app": {
         "port": 3000,
-        "ip": "192.168.2.55",
+        "ip": "192.168.2.40",
         "encoderTranferRate": 200,
         "encoderSampleRate": 10,
         "heartBeatFrequency": 1,
