@@ -15,6 +15,7 @@ export class SystemInfoController {
   }
   @Post('result')
   async result(@Body() data) {
+    console.log(JSON.stringify(data, null, 2));
     Logger.log(` [ GET RESULT ] : ${data.id}`);
   }
   @Get('encoderVal')
@@ -26,6 +27,7 @@ export class SystemInfoController {
   loadPlcConfig() {
     return this.systemInfoService.loadPlcConfig();
   }
+  Ư;
 
   @Get('testHttp')
   testHttp() {
