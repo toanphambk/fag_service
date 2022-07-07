@@ -7,7 +7,7 @@ export interface PlcData {
   conveyorRampUp: number;
   conveyorRampDown: number;
   conveyorStatus: boolean;
-  robotEncoderValue: Array<number>;
+  plcEncoderValue: number;
   loadRequest: number;
   lbTrigger: boolean;
   blockReady: boolean;

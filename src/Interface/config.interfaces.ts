@@ -9,6 +9,7 @@ export interface Config {
     loadRequest: string;
     conveyorSpeed: string;
     softEncoderValue: string;
+    plcEncoderValue: string;
     conveyorRampUp: string;
     conveyorRampDown: string;
     ipcStatus: string;

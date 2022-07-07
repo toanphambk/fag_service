@@ -47,11 +47,11 @@ export class SystemInfoService {
       conveyorRampUp: 0,
       conveyorRampDown: 0,
       softEncoderValue: 0,
+      plcEncoderValue: 0,
       ipcClock: false,
       lbTrigger: false,
       blockReady: false,
       loadRequest: 0,
-      robotEncoderValue: [0, 0, 0, 0],
       vehicleCode: '',
       vehicleColor: '',
       prodNum: '',
@@ -250,7 +250,7 @@ export class SystemInfoService {
 
   public eyeFlowEncoderLogger = () => {
     const _data = {
-      encoderVal: Math.floor(this.encoderVal),
+      encoderVal: Math.floor(this.systemInfo.plcData.plcEncoderValue),
       conveyorStatus: conveyorState[this.conveyorState],
     };
     return _data;
