@@ -307,7 +307,11 @@ export class SystemInfoService {
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       const _change = Object.keys(data)
         .filter((key) => {
-          if (key !== 'ipcClock' && key !== 'softEncoderValue') {
+          if (
+            key !== 'ipcClock' &&
+            key !== 'softEncoderValue' &&
+            key !== 'plcEncoderValue'
+          ) {
             return data[key] != this.systemInfo.plcData[key];
           }
         })
