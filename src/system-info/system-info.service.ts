@@ -250,7 +250,8 @@ export class SystemInfoService {
 
   public eyeFlowEncoderLogger = () => {
     const _data = {
-      encoderVal: Math.floor(this.systemInfo.plcData.plcEncoderValue),
+      // encoderVal: Math.floor(this.systemInfo.plcData.plcEncoderValue),
+      encoderVal: Math.floor(this.encoderVal),
       conveyorStatus: conveyorState[this.conveyorState],
     };
     return _data;
