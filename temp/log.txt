@@ -1,6 +1,0 @@
-07/01/2022 02:52:55, C:\Users\toan.pham.HM-ROA\Desktop\fag_services\test\test.csv
-07/01/2022 02:53:00, C:\Users\toan.pham.HM-ROA\Desktop\fag_services\test\test1.csv
-07/01/2022 02:54:30, C:\Users\toan.pham.HM-ROA\Desktop\fag_services\test\test.csv
-07/01/2022 02:54:35, C:\Users\toan.pham.HM-ROA\Desktop\fag_services\test\test1.csv
-07/01/2022 02:55:10, C:\Users\toan.pham.HM-ROA\Desktop\fag_services\test\test.csv
-07/01/2022 02:55:15, C:\Users\toan.pham.HM-ROA\Desktop\fag_services\test\test1.csv

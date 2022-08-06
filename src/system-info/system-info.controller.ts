@@ -13,13 +13,16 @@ export class SystemInfoController {
       throw error;
     }
   }
+
   @Post('result')
   async result(@Body() data) {
     console.log(JSON.stringify(data, null, 2));
     Logger.log(` [ GET RESULT ] : ${data.id}`);
   }
+
   @Get('encoderVal')
   encoderVal() {
+    console.log('ENCODER REQUEST COMMING IN');
     return this.systemInfoService.eyeFlowEncoderLogger();
   }
 
