@@ -22,7 +22,6 @@ export class SystemInfoController {
 
   @Get('encoderVal')
   encoderVal() {
-    console.log('ENCODER REQUEST COMMING IN');
     return this.systemInfoService.eyeFlowEncoderLogger();
   }
 
