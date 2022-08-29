@@ -59,7 +59,7 @@ export class SystemInfoService {
   };
 
   private index = 0;
-  private hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
+  private hardEncoderData = 0;
   private carQueue: {
     detectedPos: number;
     carInfo: {
@@ -305,11 +305,9 @@ export class SystemInfoService {
   };
 
   private onPlcRead = (data) => {
-    console.log(data);
-
     //update plcdata if change
     if (data.blockReady === undefined) return;
-
+    this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       const _change = Object.keys(data)
         .filter((key) => {
