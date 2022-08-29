@@ -1,6 +1,6 @@
-$path = "C:\Users\Admin\Desktop\Work Space\fag_service\test" 
+$path = "C:\Users\Admin\Desktop\Work Space\flush and gap\fag_service\test" 
 $url = "http://localhost:3000/system-info/result"
-$temp_path = "C:\Users\Admin\Desktop\Work Space\fag_service\temp"
+$temp_path = "C:\Users\Admin\Desktop\Work Space\flush and gap\fag_service\temp"
 
 While (1) {
     $file =  Get-ChildItem -Path $path -Filter "*.csv" | Select-Object -ExpandProperty FullName

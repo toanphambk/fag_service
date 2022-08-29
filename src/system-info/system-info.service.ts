@@ -59,6 +59,7 @@ export class SystemInfoService {
   };
 
   private index = 0;
+  private hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
   private carQueue: {
     detectedPos: number;
     carInfo: {
@@ -68,6 +69,7 @@ export class SystemInfoService {
       b64vin: string;
     };
   }[] = [];
+
   private initSystem = async () => {
     try {
       await this.plcCommunicationService.initConnection(
@@ -172,7 +174,7 @@ export class SystemInfoService {
       };
     }
 
-    const _detectedPos = this.encoderVal;
+    const _detectedPos = this.hardEncoderData;
     if (
       this.carQueue.find(
         (_car) => _car.carInfo.VINNum == carData.data.carInfo.VINNum,
@@ -250,7 +252,7 @@ export class SystemInfoService {
 
   public eyeFlowEncoderLogger = () => {
     const _data = {
-      encoderVal: Math.floor(this.systemInfo.plcData.plcEncoderValue),
+      encoderVal: Math.floor(this.hardEncoderData),
       conveyorStatus: conveyorState[this.conveyorState],
     };
     return _data;
@@ -258,7 +260,7 @@ export class SystemInfoService {
 
   private carQueueUpdate = () => {
     this.carQueue = this.carQueue.filter((e) => {
-      return this.encoderVal - e.detectedPos < 9000;
+      return this.hardEncoderData - e.detectedPos < 9000;
     });
   };
 
