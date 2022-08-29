@@ -154,7 +154,9 @@ export class SystemInfoService {
       60000 / this.systemConfigService.systemConfig.app.encoderSampleRate
     ) {
       this.index = 0;
-      return Logger.log(`[ ENCODER LOG ] : ` + Math.floor(this.encoderVal));
+      return Logger.log(
+        `[ ENCODER LOG ] : ` + Math.floor(this.hardEncoderData),
+      );
     }
   };
 
