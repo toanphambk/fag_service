@@ -305,6 +305,8 @@ export class SystemInfoService {
   };
 
   private onPlcRead = (data) => {
+    console.log(data);
+
     //update plcdata if change
     if (data.blockReady === undefined) return;
 
