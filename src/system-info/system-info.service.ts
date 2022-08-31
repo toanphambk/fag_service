@@ -181,7 +181,6 @@ export class SystemInfoService {
       };
     }
 
-    const _detectedPos = this.hardEncoderData;
     if (
       this.carQueue.find(
         (_car) => _car.carInfo.VINNum == carData.data.carInfo.VINNum,
@@ -226,6 +225,7 @@ export class SystemInfoService {
       (e) => e.vehicleCode == carData.data.carInfo.vehicleCode.toUpperCase(),
     );
 
+    const _detectedPos = this.hardEncoderData;
     await this.plcCommunicationService.writeToPLC(
       ['prodNum', 'vehicleCode', 'vehicleColor', 'vehicleMode', 'blockReady'],
       [
@@ -237,6 +237,11 @@ export class SystemInfoService {
       ],
     );
 
+    this.carQueue.push({
+      detectedPos: _detectedPos,
+      carInfo: carData.data.carInfo,
+    });
+
     const _ = {
       vinVum: carData.data.carInfo.VINNum.toUpperCase(),
       uuid: carData.data.carInfo.b64vin,
@@ -244,11 +249,6 @@ export class SystemInfoService {
       vehicleColor: carData.data.carInfo.vehicleColor.toUpperCase(),
       setingIndex: index == -1 ? 0 : index,
     };
-
-    this.carQueue.push({
-      detectedPos: _detectedPos,
-      carInfo: carData.data.carInfo,
-    });
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
     console.log(this.carQueue);
     return {
