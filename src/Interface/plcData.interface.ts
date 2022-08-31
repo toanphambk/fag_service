@@ -19,6 +19,7 @@ export interface PlcData {
   softEncoderValue: number;
   conveyorSpeed: number;
   sequenceReset: boolean;
+  conveyorBypas: boolean;
 }
 
 export enum plcState {

@@ -16,7 +16,9 @@
         "plcStatus": "DB1,INT6.1",
         "errorID": "DB1,INT8.1 ",
         "lbTrigger": "DB1,X18.0",
-        "sequenceReset":"M14.0"
+        "sequenceReset":"M14.0",
+        "conveyorBypas":"M0.7"
+
     },
     "plcConnection": {
         "ip": "192.168.1.50",

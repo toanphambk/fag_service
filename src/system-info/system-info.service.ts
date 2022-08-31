@@ -56,6 +56,7 @@ export class SystemInfoService {
       vehicleColor: '',
       prodNum: '',
       sequenceReset: false,
+      conveyorBypas: false,
     },
   };
 
@@ -266,11 +267,22 @@ export class SystemInfoService {
     return _data;
   };
 
+  public conveyorBypas = async () => {
+    await this.plcCommunicationService.writeToPLC(
+      ['conveyorBypas'],
+      [!this.systemInfo.plcData.conveyorBypas],
+    );
+    return {
+      source: 'data received',
+      description: this.systemInfo.plcData.conveyorBypas,
+    };
+  };
+
   private carQueueUpdate = () => {
     this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
     const b4Filter = this.carQueue.length;
     this.carQueue = this.carQueue.filter((e) => {
-      return this.hardEncoderData - e.detectedPos < 7000;
+      return this.hardEncoderData - e.detectedPos < 90000;
     });
     if (b4Filter != this.carQueue.length) {
       Logger.log(

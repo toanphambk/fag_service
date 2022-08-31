@@ -15,6 +15,15 @@ export class SystemInfoController {
     }
   }
 
+  @Post('bypass')
+  async bypassConveyor(@Body() carInfo: addCarDto) {
+    try {
+      return this.systemInfoService.conveyorBypas();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Post('result')
   async result(@Body() data) {
     console.log(JSON.stringify(data, null, 2));
@@ -31,7 +40,6 @@ export class SystemInfoController {
   loadPlcConfig() {
     return this.systemInfoService.loadPlcConfig();
   }
-  Ư;
 
   @Get('testHttp')
   testHttp() {
