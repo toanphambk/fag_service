@@ -166,21 +166,6 @@ export class SystemInfoService {
   };
 
   public addCar = async (carData: addCarDto) => {
-    if (carData.status == addCarStatusEnum.FAIL) {
-      const _error = {
-        Error: 'OCR Error',
-        Desscription: {
-          message: carData.data.description,
-          carData: carData.data.carInfo,
-        },
-      };
-      this.plcCommunicationService.plcEvent.emit('System_Error', _error, true);
-      return {
-        status: HttpStatus.OK,
-        error: _error,
-      };
-    }
-
     if (
       this.carQueue.find(
         (_car) => _car.carInfo.VINNum == carData.data.carInfo.VINNum,
@@ -219,6 +204,17 @@ export class SystemInfoService {
         },
         HttpStatus.NOT_ACCEPTABLE,
       );
+    }
+
+    if (carData.status == addCarStatusEnum.FAIL) {
+      const _error = {
+        Error: 'OCR Error',
+        Desscription: {
+          message: carData.data.description,
+          carData: carData.data.carInfo,
+        },
+      };
+      this.plcCommunicationService.plcEvent.emit('System_Error', _error, true);
     }
 
     const index = this.plcConfig.findIndex(
