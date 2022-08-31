@@ -85,9 +85,12 @@ export class SystemInfoService {
         },
       );
 
-      this.plcCommunicationService.plcEvent.on('System_Error', (err) => {
-        this.onError(err);
-      });
+      this.plcCommunicationService.plcEvent.on(
+        'System_Error',
+        (err, bypass) => {
+          this.onError(err, bypass);
+        },
+      );
 
       this.plcCommunicationService.plcEvent.on('Ipc_Ready', () => {
         this.onIpcReady();
@@ -99,11 +102,11 @@ export class SystemInfoService {
 
       this.initSoftEncoder();
 
-      this.softEncoderTranfer();
+      // this.softEncoderTranfer();
 
       this.ipcClockTrander();
     } catch (error) {
-      this.onError(error);
+      this.onError(error, false);
     }
   };
 
@@ -130,6 +133,7 @@ export class SystemInfoService {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'Load Config Error',
+        false,
       );
     }
   };
@@ -140,7 +144,6 @@ export class SystemInfoService {
       this.systemConfigService.systemConfig.app.encoderSampleRate,
     );
     this.index++;
-    this.carQueueUpdate();
 
     this.conveyorState = this.systemInfo.plcData.conveyorSpeed
       ? conveyorState.RUNNING
@@ -171,7 +174,7 @@ export class SystemInfoService {
           carData: carData.data.carInfo,
         },
       };
-      this.plcCommunicationService.plcEvent.emit('System_Error', _error);
+      this.plcCommunicationService.plcEvent.emit('System_Error', _error, true);
       return {
         status: HttpStatus.OK,
         error: _error,
@@ -193,7 +196,7 @@ export class SystemInfoService {
       };
 
       Logger.log('[ NEW CAR ERROR ] :' + `${JSON.stringify(_error, null, 2)}`);
-      this.plcCommunicationService.plcEvent.emit('System_Error', _error);
+      this.plcCommunicationService.plcEvent.emit('System_Error', _error, false);
       throw new HttpException(
         {
           status: HttpStatus.NOT_ACCEPTABLE,
@@ -209,7 +212,7 @@ export class SystemInfoService {
         Desscription: 'Plc Block Ready Error',
       };
       this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-      this.plcCommunicationService.plcEvent.emit('System_Error', _error);
+      this.plcCommunicationService.plcEvent.emit('System_Error', _error, false);
       throw new HttpException(
         {
           status: HttpStatus.NOT_ACCEPTABLE,
@@ -263,9 +266,16 @@ export class SystemInfoService {
   };
 
   private carQueueUpdate = () => {
+    this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
+    const b4Filter = this.carQueue.length;
     this.carQueue = this.carQueue.filter((e) => {
-      return this.hardEncoderData - e.detectedPos < 9000;
+      return this.hardEncoderData - e.detectedPos < 7000;
     });
+    if (b4Filter === this.carQueue.length) {
+      Logger.log(
+        `[ CAR QUEUE ] :\n` + JSON.stringify(this.carQueue, null, 2) + '\n',
+      );
+    }
   };
 
   private softEncoderTranfer = () => {
@@ -309,7 +319,7 @@ export class SystemInfoService {
   private onPlcRead = (data) => {
     //update plcdata if change
     if (data.blockReady === undefined) return;
-    this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
+    this.carQueueUpdate();
     if (JSON.stringify(this.systemInfo.plcData) !== JSON.stringify(data)) {
       const _change = Object.keys(data)
         .filter((key) => {
@@ -353,10 +363,13 @@ export class SystemInfoService {
     }
   };
 
-  private onError = (err) => {
+  private onError = (err, bypass) => {
     //send Post request
+    if (bypass) {
+      Logger.error(`[ ERROR LOG ] : ${JSON.stringify(err, null, 2)} `);
+      return;
+    }
     this.systemInfo.systemData.ipcInfo = serverState.ERROR;
-    Logger.error(`[ ERROR LOG ] : ${JSON.stringify(err, null, 2)} `);
   };
 
   private onIpcInit = () => {
