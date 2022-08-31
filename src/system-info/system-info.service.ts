@@ -156,7 +156,7 @@ export class SystemInfoService {
     }
     if (
       this.index ==
-      60000 / this.systemConfigService.systemConfig.app.encoderSampleRate
+      10000 / this.systemConfigService.systemConfig.app.encoderSampleRate
     ) {
       this.index = 0;
       return Logger.log(
