@@ -55,6 +55,7 @@ export class SystemInfoService {
       vehicleCode: '',
       vehicleColor: '',
       prodNum: '',
+      sequenceReset: false,
     },
   };
 
@@ -123,6 +124,7 @@ export class SystemInfoService {
       });
       Logger.log(`[ PLC CONFIG ] \n` + _temp);
       this.encoderVal = 0;
+      this.carQueue = [];
       return this.plcConfig;
     } catch (error) {
       this.plcCommunicationService.plcEvent.emit(
@@ -337,7 +339,10 @@ export class SystemInfoService {
   };
 
   private systemOnChange = () => {
-    if (this.systemInfo.plcData.loadRequest === 1) {
+    if (
+      this.systemInfo.plcData.loadRequest === 1 ||
+      this.systemInfo.plcData.sequenceReset === true
+    ) {
       this.loadPlcConfig();
     }
     if (this.systemInfo.plcData.ipcStatus === serverState.ERROR) {

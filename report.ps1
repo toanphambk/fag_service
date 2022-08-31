@@ -18,7 +18,7 @@ While (1) {
         $body = @{id = $csv[1] ; data  = $meaResult }  
         $res = Invoke-WebRequest -Uri  $url -Method POST -Body ($body|ConvertTo-Json) -ContentType "application/json" -UseBasicParsing
         $res
-        if ($res.StatusCode -eq 201) { Move-Item -Path $csv_path  -Destination $temp_path}
+        # if ($res.StatusCode -eq 201) { Move-Item -Path $csv_path  -Destination $temp_path}
     }
-    Start-Sleep 1
+    Start-Sleep 10
 }

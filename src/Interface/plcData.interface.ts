@@ -1,3 +1,5 @@
+import { BlobOptions } from 'buffer';
+
 export interface PlcData {
   ipcStatus: serverState;
   serverStatus: serverState;
@@ -16,6 +18,7 @@ export interface PlcData {
   prodNum: string;
   softEncoderValue: number;
   conveyorSpeed: number;
+  sequenceReset: boolean;
 }
 
 export enum plcState {

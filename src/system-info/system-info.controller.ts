@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Logger } from '@nestjs/common';
 import { SystemInfoService } from './system-info.service';
 import { addCarDto } from './dto/carInfo.dto';
+import { writeFileSync } from 'fs';
 
 @Controller('system-info')
 export class SystemInfoController {
@@ -17,6 +18,7 @@ export class SystemInfoController {
   @Post('result')
   async result(@Body() data) {
     console.log(JSON.stringify(data, null, 2));
+    writeFileSync('./test.json', JSON.stringify(data, null, 2));
     Logger.log(` [ GET RESULT ] : ${data.id}`);
   }
 
