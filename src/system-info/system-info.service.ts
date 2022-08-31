@@ -271,7 +271,7 @@ export class SystemInfoService {
     this.carQueue = this.carQueue.filter((e) => {
       return this.hardEncoderData - e.detectedPos < 7000;
     });
-    if (b4Filter === this.carQueue.length) {
+    if (b4Filter != this.carQueue.length) {
       Logger.log(
         `[ CAR QUEUE ] :\n` + JSON.stringify(this.carQueue, null, 2) + '\n',
       );
