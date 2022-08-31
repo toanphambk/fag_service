@@ -326,7 +326,8 @@ export class SystemInfoService {
           if (
             key !== 'ipcClock' &&
             key !== 'softEncoderValue' &&
-            key !== 'plcEncoderValue'
+            key !== 'plcEncoderValue' &&
+            key !== 'conveyorSpeed'
           ) {
             return data[key] != this.systemInfo.plcData[key];
           }
