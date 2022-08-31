@@ -68,6 +68,7 @@ export class SystemInfoService {
       vehicleColor: string;
       VINNum: string;
       b64vin: string;
+      index: number;
     };
   }[] = [];
 
@@ -206,6 +207,7 @@ export class SystemInfoService {
       );
     }
 
+    let index = 0;
     if (carData.status == addCarStatusEnum.FAIL) {
       const _error = {
         Error: 'OCR Error',
@@ -215,11 +217,11 @@ export class SystemInfoService {
         },
       };
       this.plcCommunicationService.plcEvent.emit('System_Error', _error, true);
+    } else {
+      index = this.plcConfig.findIndex(
+        (e) => e.vehicleCode == carData.data.carInfo.vehicleCode.toUpperCase(),
+      );
     }
-
-    const index = this.plcConfig.findIndex(
-      (e) => e.vehicleCode == carData.data.carInfo.vehicleCode.toUpperCase(),
-    );
 
     const _detectedPos = this.hardEncoderData;
     await this.plcCommunicationService.writeToPLC(
@@ -233,18 +235,19 @@ export class SystemInfoService {
       ],
     );
 
-    this.carQueue.push({
-      detectedPos: _detectedPos,
-      carInfo: carData.data.carInfo,
-    });
-
     const _ = {
-      vinVum: carData.data.carInfo.VINNum.toUpperCase(),
-      uuid: carData.data.carInfo.b64vin,
+      VINNum: carData.data.carInfo.VINNum.toUpperCase(),
+      b64vin: carData.data.carInfo.b64vin,
       vehicleCode: carData.data.carInfo.vehicleCode.toUpperCase(),
       vehicleColor: carData.data.carInfo.vehicleColor.toUpperCase(),
-      setingIndex: index == -1 ? 0 : index,
+      index: index == -1 ? 0 : index,
     };
+
+    this.carQueue.push({
+      detectedPos: _detectedPos,
+      carInfo: _,
+    });
+
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
     Logger.log(
       `[ CAR QUEUE ] :\n` + JSON.stringify(this.carQueue, null, 2) + '\n',
