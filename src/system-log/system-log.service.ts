@@ -48,7 +48,7 @@ export class SystemLogService extends ConsoleLogger {
       appendFileSync(path.resolve('./dist/log/result.log'), msg);
     }
     if (message.includes('[ CAR QUEUE ]')) {
-      appendFileSync(path.resolve('./dist/log/carQueu.log'), msg);
+      appendFileSync(path.resolve('./dist/log/queue.log'), msg);
     }
   }
 }

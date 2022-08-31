@@ -246,7 +246,9 @@ export class SystemInfoService {
       setingIndex: index == -1 ? 0 : index,
     };
     Logger.log('[ NEW CAR ] :' + `${JSON.stringify(_, null, 2)}`);
-    console.log(this.carQueue);
+    Logger.log(
+      `[ CAR QUEUE ] :\n` + JSON.stringify(this.carQueue, null, 2) + '\n',
+    );
     return {
       source: 'data received',
       description: carData.data,
