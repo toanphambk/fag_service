@@ -278,11 +278,22 @@ export class SystemInfoService {
     };
   };
 
+  public systemReset = async () => {
+    await this.plcCommunicationService.writeToPLC(
+      ['conveyorBypas'],
+      [!this.systemInfo.plcData.conveyorBypas],
+    );
+    return {
+      source: 'data received',
+      description: this.systemInfo.plcData.conveyorBypas,
+    };
+  };
+
   private carQueueUpdate = () => {
     this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
     const b4Filter = this.carQueue.length;
     this.carQueue = this.carQueue.filter((e) => {
-      return this.hardEncoderData - e.detectedPos < 90000;
+      return this.hardEncoderData - e.detectedPos < 8000;
     });
     if (b4Filter != this.carQueue.length) {
       Logger.log(
