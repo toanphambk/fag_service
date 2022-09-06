@@ -168,11 +168,10 @@ export class SystemInfoService {
   };
 
   public addCar = async (carData: addCarDto) => {
-    if (
-      this.carQueue.find(
-        (_car) => _car.carInfo.VINNum == carData.data.carInfo.VINNum,
-      ) != undefined
-    ) {
+    const dupplicate = this.carQueue.find(
+      (_car) => _car.carInfo.VINNum == carData.data.carInfo.VINNum,
+    );
+    if (dupplicate != undefined && carData.data.carInfo.VINNum != 'INVALID') {
       const _error = {
         error: 'Car Info Write Error',
         desscription: {
