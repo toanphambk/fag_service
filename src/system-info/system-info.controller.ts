@@ -27,8 +27,9 @@ export class SystemInfoController {
   @Post('result')
   async result(@Body() data) {
     console.log(JSON.stringify(data, null, 2));
-    writeFileSync('./test.json', JSON.stringify(data, null, 2));
     Logger.log(` [ GET RESULT ] : ${data.id}`);
+    // const buf = Buffer.from(data.base64, 'base64');
+    // writeFileSync('result_base64.pdf', buf, 'base64');
   }
 
   @Get('encoderVal')
