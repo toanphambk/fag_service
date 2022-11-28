@@ -421,7 +421,7 @@ export class SystemInfoService {
           this.plcCommunicationService.writeToPLC(
             [JSON.stringify(device)],
             [this.systemInfo.systemData[device]],
-            false,
+            true,
           );
         }
       }
