@@ -380,7 +380,6 @@ export class SystemInfoService {
 
   private onPlcRead = (data) => {
     console.log(data);
-
     //update plcdata if change
     if (data.blockReady === undefined) return;
     this.carQueueUpdate();
@@ -432,7 +431,7 @@ export class SystemInfoService {
     ) {
       this.loadPlcConfig();
     }
-    if (this.systemInfo.plcData.fgUploadService) {
+    if (this.systemInfo.plcData.fgUploadService == serverState.ERROR) {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'upload service not responding ',
@@ -440,7 +439,7 @@ export class SystemInfoService {
       );
     }
 
-    if (this.systemInfo.plcData.eyeflowService) {
+    if (this.systemInfo.plcData.eyeflowService == serverState.ERROR) {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'eyeflow service not responding ',
