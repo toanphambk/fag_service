@@ -2,7 +2,7 @@ import { PlcData } from './plcData.interface';
 
 export interface SystemInfo {
   systemData: {
-    ipcInfo: serverState;
+    ipcStatus: serverState;
     eyeflowService: serverState;
     fgUploadService: serverState;
   };
