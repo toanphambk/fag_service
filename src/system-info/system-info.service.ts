@@ -413,6 +413,7 @@ export class SystemInfoService {
         );
         this.systemOnChange();
       }
+
       for (const device in this.systemInfo.systemData) {
         if (
           this.systemInfo.systemData[device] != this.systemInfo.plcData[device]

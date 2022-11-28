@@ -1,5 +1,3 @@
-import { BlobOptions } from 'buffer';
-
 export interface PlcData {
   ipcStatus: serverState;
   eyeflowService: serverState;
