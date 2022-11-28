@@ -433,12 +433,6 @@ export class SystemInfoService {
     ) {
       this.loadPlcConfig();
     }
-    if (this.systemInfo.systemData.ipcStatus === serverState.ERROR) {
-      this.plcCommunicationService.writeToPLC(
-        ['ipcStatus'],
-        [serverState.ERROR],
-      );
-    }
     if (this.systemInfo.plcData.fgUploadService) {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
@@ -446,6 +440,7 @@ export class SystemInfoService {
         false,
       );
     }
+
     if (this.systemInfo.plcData.eyeflowService) {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
