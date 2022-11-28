@@ -421,8 +421,8 @@ export class SystemInfoService {
           console.log(device);
           console.log(this.systemInfo.systemData[device]);
           this.plcCommunicationService.writeToPLC(
-            [JSON.stringify(device)],
-            [Number(this.systemInfo.systemData[device])],
+            [device],
+            [this.systemInfo.systemData[device]],
             true,
           );
         }
