@@ -308,6 +308,10 @@ export class SystemInfoService {
     if (param) {
       clearInterval(this.serviceTimer.timer[param.name]);
       this.initServiceTimer(param.name, param.interval);
+      this.plcCommunicationService.writeToPLC(
+        [param.name],
+        [serverState.READY],
+      );
       return param;
     } else {
       throw new HttpException(
