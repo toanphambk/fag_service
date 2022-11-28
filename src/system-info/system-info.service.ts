@@ -323,11 +323,16 @@ export class SystemInfoService {
   private async initServiceTimer(serviceName: string, interval: number) {
     this.serviceTimer.timer[serviceName] = setInterval(async () => {
       this.systemInfo.systemData[serviceName] = serverState.ERROR;
-      // await this.plcCommunicationService.writeToPLC(
-      //   [serviceName],
-      //   [serverState.ERROR],
-      //   false,
-      // );
+      if (
+        this.systemInfo.systemData[serviceName] !==
+        this.systemInfo.plcData[serviceName]
+      ) {
+        await this.plcCommunicationService.writeToPLC(
+          [serviceName],
+          [serverState.ERROR],
+          false,
+        );
+      }
     }, interval);
   }
 
