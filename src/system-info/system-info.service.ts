@@ -39,7 +39,7 @@ export class SystemInfoService {
       fgUploadService: serverState.INIT,
     },
     plcData: {
-      ipcInfo: serverState.INIT,
+      ipcStatus: serverState.INIT,
       eyeflowService: serverState.INIT,
       fgUploadService: serverState.INIT,
       plcStatus: plcState.INIT,
