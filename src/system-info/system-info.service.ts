@@ -418,8 +418,6 @@ export class SystemInfoService {
         if (
           this.systemInfo.systemData[device] != this.systemInfo.plcData[device]
         ) {
-          console.log(device);
-          console.log(this.systemInfo.systemData[device]);
           this.plcCommunicationService.writeToPLC(
             [device],
             [this.systemInfo.systemData[device]],
