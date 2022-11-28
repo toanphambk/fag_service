@@ -439,7 +439,7 @@ export class SystemInfoService {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'upload service not responding ',
-        false,
+        true,
       );
     }
 
@@ -447,7 +447,7 @@ export class SystemInfoService {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'eyeflow service not responding ',
-        false,
+        true,
       );
     }
   };
