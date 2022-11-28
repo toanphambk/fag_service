@@ -328,7 +328,6 @@ export class SystemInfoService {
       //   [serverState.ERROR],
       //   false,
       // );
-      console.log(`service [${serviceName}] not responding`);
     }, interval);
   }
 
@@ -429,20 +428,20 @@ export class SystemInfoService {
         [serverState.ERROR],
       );
     }
-    if (this.systemInfo.plcData.fgUploadService) {
-      this.plcCommunicationService.plcEvent.emit(
-        'System_Error',
-        'upload service not responding ',
-        false,
-      );
-    }
-    if (this.systemInfo.plcData.eyeflowService) {
-      this.plcCommunicationService.plcEvent.emit(
-        'System_Error',
-        'eyeflow service not responding ',
-        false,
-      );
-    }
+    // if ((this.systemInfo.plcData.fgUploadService == serverState.ERROR)) {
+    //   this.plcCommunicationService.plcEvent.emit(
+    //     'System_Error',
+    //     'upload service not responding ',
+    //     false,
+    //   );
+    // }
+    // if (this.systemInfo.plcData.eyeflowService serverState.ERROR)) {
+    //   this.plcCommunicationService.plcEvent.emit(
+    //     'System_Error',
+    //     'eyeflow service not responding ',
+    //     false,
+    //   );
+    // }
   };
 
   private onError = (err, bypass) => {
