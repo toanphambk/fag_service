@@ -11,7 +11,6 @@ import { SystemConfigService } from '../system-config/system-config.service';
 import { HttpService } from '@nestjs/axios';
 import { Observable, map } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import { PlcData } from '../../dist/Interface/plcData.interface';
 
 @Injectable()
 export class SystemInfoService {
