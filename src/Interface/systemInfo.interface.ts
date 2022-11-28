@@ -10,9 +10,9 @@ export interface SystemInfo {
 }
 
 export enum serverState {
-  INIT = 0,
-  READY = 1,
-  ERROR = 2,
+  ERROR = 0,
+  INIT = 1,
+  READY = 2,
 }
 
 export enum systemError {
