@@ -35,11 +35,13 @@ export class SystemInfoService {
   public systemInfo: SystemInfo = {
     systemData: {
       ipcInfo: serverState.INIT,
-      serverInfo: serverState.INIT,
+      eyeflowService: serverState.INIT,
+      fgUploadService: serverState.INIT,
     },
     plcData: {
-      ipcStatus: serverState.INIT,
-      serverStatus: serverState.INIT,
+      ipcInfo: serverState.INIT,
+      eyeflowService: serverState.INIT,
+      fgUploadService: serverState.INIT,
       plcStatus: plcState.INIT,
       errorID: plcError.SYSTEM_NORMAL,
       conveyorStatus: false,
@@ -61,6 +63,13 @@ export class SystemInfoService {
   };
 
   private index = 0;
+  private serviceTimer = {
+    timer: {},
+    param: [
+      { name: 'eyeflowService', interval: 2000 },
+      { name: 'fgUploadService', interval: 2000 },
+    ],
+  };
   private hardEncoderData = 0;
   private carQueue: {
     detectedPos: number;
@@ -75,10 +84,10 @@ export class SystemInfoService {
 
   private initSystem = async () => {
     try {
-      await this.plcCommunicationService.initConnection(
-        this.systemConfigService.systemConfig.dataBlock,
-      );
-      this.plcCommunicationService.startScan();
+      // await this.plcCommunicationService.initConnection(
+      //   this.systemConfigService.systemConfig.dataBlock,
+      // );
+      // this.plcCommunicationService.startScan();
 
       this.plcCommunicationService.plcEvent.on(
         'Plc_Read_Callback',
@@ -86,6 +95,10 @@ export class SystemInfoService {
           this.onPlcRead(plcData);
         },
       );
+
+      this.serviceTimer.param.forEach((param) => {
+        this.initServiceTimer(param.name, param.interval);
+      });
 
       this.plcCommunicationService.plcEvent.on(
         'System_Error',
@@ -288,6 +301,41 @@ export class SystemInfoService {
     };
   };
 
+  public serviceCheck(serviceName: string) {
+    const param = this.serviceTimer.param.find(
+      ({ name }) => name == serviceName,
+    );
+    if (param) {
+      clearInterval(this.serviceTimer.timer[param.name]);
+      this.initServiceTimer(param.name, param.interval);
+      return param;
+    } else {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_ACCEPTABLE,
+          error: 'service Name not found',
+        },
+        HttpStatus.NOT_ACCEPTABLE,
+      );
+    }
+  }
+
+  private async initServiceTimer(serviceName: string, interval: number) {
+    this.serviceTimer.timer[serviceName] = setInterval(async () => {
+      this.systemInfo.systemData[serviceName] = serverState.ERROR;
+      await this.plcCommunicationService.writeToPLC(
+        [serviceName],
+        [serverState.ERROR],
+        false,
+      );
+      this.plcCommunicationService.plcEvent.emit(
+        'System_Error',
+        'Flush and gap Upload Service Error',
+        false,
+      );
+    }, interval);
+  }
+
   private carQueueUpdate = () => {
     this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
     const b4Filter = this.carQueue.length;
@@ -379,10 +427,21 @@ export class SystemInfoService {
     ) {
       this.loadPlcConfig();
     }
-    if (this.systemInfo.plcData.ipcStatus === serverState.ERROR) {
-      this.plcCommunicationService.writeToPLC(
-        ['ipcStatus'],
-        [serverState.ERROR],
+    if (this.systemInfo.plcData.ipcInfo === serverState.ERROR) {
+      this.plcCommunicationService.writeToPLC(['ipcInfo'], [serverState.ERROR]);
+    }
+    if (this.systemInfo.plcData.fgUploadService) {
+      this.plcCommunicationService.plcEvent.emit(
+        'System_Error',
+        'upload service not responding ',
+        false,
+      );
+    }
+    if (this.systemInfo.plcData.eyeflowService) {
+      this.plcCommunicationService.plcEvent.emit(
+        'System_Error',
+        'eyeflow service not responding ',
+        false,
       );
     }
   };
@@ -398,11 +457,11 @@ export class SystemInfoService {
 
   private onIpcInit = () => {
     this.systemInfo.systemData.ipcInfo = serverState.INIT;
-    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
+    this.plcCommunicationService.writeToPLC(['ipcInfo'], [serverState.INIT]);
   };
 
   private onIpcReady = () => {
     this.systemInfo.systemData.ipcInfo = serverState.READY;
-    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.READY]);
+    this.plcCommunicationService.writeToPLC(['ipcInfo'], [serverState.READY]);
   };
 }

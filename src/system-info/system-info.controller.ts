@@ -29,7 +29,12 @@ export class SystemInfoController {
     console.log(JSON.stringify(data, null, 2));
     Logger.log(` [ GET RESULT ] : ${data.id}`);
     // const buf = Buffer.from(data.base64, 'base64');
-    // writeFileSync('result_base64.pdf', buf, 'base64');
+    // writeFileSync(`./temp/${data.id}.pdf`, buf, 'base64');
+  }
+
+  @Post('serviceStat')
+  uploadServiceStat(@Body() data) {
+    return this.systemInfoService.serviceCheck(data.serviceName);
   }
 
   @Get('encoderVal')
