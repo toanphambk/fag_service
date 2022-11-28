@@ -11,6 +11,7 @@ import { SystemConfigService } from '../system-config/system-config.service';
 import { HttpService } from '@nestjs/axios';
 import { Observable, map } from 'rxjs';
 import { AxiosResponse } from 'axios';
+import { PlcData } from '../../dist/Interface/plcData.interface';
 
 @Injectable()
 export class SystemInfoService {
@@ -308,10 +309,7 @@ export class SystemInfoService {
     if (param) {
       clearInterval(this.serviceTimer.timer[param.name]);
       this.initServiceTimer(param.name, param.interval);
-      this.plcCommunicationService.writeToPLC(
-        [param.name],
-        [serverState.READY],
-      );
+      this.systemInfo.systemData[serviceName] = serverState.READY;
       return param;
     } else {
       throw new HttpException(
@@ -327,11 +325,6 @@ export class SystemInfoService {
   private async initServiceTimer(serviceName: string, interval: number) {
     this.serviceTimer.timer[serviceName] = setInterval(async () => {
       this.systemInfo.systemData[serviceName] = serverState.ERROR;
-      await this.plcCommunicationService.writeToPLC(
-        [serviceName],
-        [serverState.ERROR],
-        false,
-      );
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'Flush and gap Upload Service Error',
@@ -420,6 +413,16 @@ export class SystemInfoService {
           `[ STATE CHANGE ] :\n` + JSON.stringify(_change, null, 2) + '\n',
         );
         this.systemOnChange();
+      }
+      for (const device in this.systemInfo.systemData) {
+        if (
+          this.systemInfo.systemData[device] !== this.systemInfo.plcData[device]
+        ) {
+          this.plcCommunicationService.writeToPLC(
+            [JSON.stringify(device)],
+            [JSON.stringify(this.systemInfo[device])],
+          );
+        }
       }
     }
   };
