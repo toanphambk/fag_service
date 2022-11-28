@@ -84,10 +84,10 @@ export class SystemInfoService {
 
   private initSystem = async () => {
     try {
-      // await this.plcCommunicationService.initConnection(
-      //   this.systemConfigService.systemConfig.dataBlock,
-      // );
-      // this.plcCommunicationService.startScan();
+      await this.plcCommunicationService.initConnection(
+        this.systemConfigService.systemConfig.dataBlock,
+      );
+      this.plcCommunicationService.startScan();
 
       this.plcCommunicationService.plcEvent.on(
         'Plc_Read_Callback',
