@@ -164,11 +164,6 @@ export class SystemInfoService {
       ? conveyorState.RUNNING
       : conveyorState.STOP;
 
-    if (this.systemInfo.plcData.conveyorSpeed) {
-      this.encoderVal +=
-        this.systemInfo.plcData.conveyorSpeed /
-        (1000 / this.systemConfigService.systemConfig.app.encoderSampleRate);
-    }
     if (
       this.index ==
       10000 / this.systemConfigService.systemConfig.app.encoderSampleRate
@@ -384,6 +379,8 @@ export class SystemInfoService {
   };
 
   private onPlcRead = (data) => {
+    console.log(data);
+
     //update plcdata if change
     if (data.blockReady === undefined) return;
     this.carQueueUpdate();
@@ -447,7 +444,7 @@ export class SystemInfoService {
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'eyeflow service not responding ',
-        true,
+        false,
       );
     }
   };
