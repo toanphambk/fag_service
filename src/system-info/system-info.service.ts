@@ -34,12 +34,12 @@ export class SystemInfoService {
   public conveyorState: conveyorState = conveyorState.STOP;
   public systemInfo: SystemInfo = {
     systemData: {
-      ipcStatus: serverState.INIT,
+      ipcInfo: serverState.INIT,
       eyeflowService: serverState.INIT,
       fgUploadService: serverState.INIT,
     },
     plcData: {
-      ipcStatus: serverState.INIT,
+      ipcInfo: serverState.INIT,
       eyeflowService: serverState.INIT,
       fgUploadService: serverState.INIT,
       plcStatus: plcState.INIT,
@@ -209,7 +209,7 @@ export class SystemInfoService {
         Error: 'Car Info Write Error',
         Desscription: 'Plc Block Ready Error',
       };
-      this.systemInfo.systemData.ipcStatus = serverState.ERROR;
+      this.systemInfo.systemData.ipcInfo = serverState.ERROR;
       this.plcCommunicationService.plcEvent.emit('System_Error', _error, false);
       throw new HttpException(
         {
@@ -308,11 +308,6 @@ export class SystemInfoService {
     if (param) {
       clearInterval(this.serviceTimer.timer[param.name]);
       this.initServiceTimer(param.name, param.interval);
-      this.systemInfo.systemData[serviceName] = serverState.READY;
-      this.plcCommunicationService.writeToPLC(
-        [param.name],
-        [serverState.READY],
-      );
       return param;
     } else {
       throw new HttpException(
@@ -328,16 +323,12 @@ export class SystemInfoService {
   private async initServiceTimer(serviceName: string, interval: number) {
     this.serviceTimer.timer[serviceName] = setInterval(async () => {
       this.systemInfo.systemData[serviceName] = serverState.ERROR;
-      await this.plcCommunicationService.writeToPLC(
-        [serviceName],
-        [serverState.ERROR],
-        false,
-      );
-      this.plcCommunicationService.plcEvent.emit(
-        'System_Error',
-        'Flush and gap Upload Service Error',
-        false,
-      );
+      // await this.plcCommunicationService.writeToPLC(
+      //   [serviceName],
+      //   [serverState.ERROR],
+      //   false,
+      // );
+      console.log(`service [${serviceName}] not responding`);
     }, interval);
   }
 
@@ -359,8 +350,8 @@ export class SystemInfoService {
       this.softEncoderTranfer();
     }, this.systemConfigService.systemConfig.app.encoderTranferRate);
     if (
-      this.systemInfo.systemData.ipcStatus == serverState.ERROR ||
-      this.systemInfo.systemData.ipcStatus == serverState.INIT
+      this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
+      this.systemInfo.systemData.ipcInfo == serverState.INIT
     )
       return;
 
@@ -379,11 +370,11 @@ export class SystemInfoService {
       this.ipcClockTrander();
     }, (1 / this.systemConfigService.systemConfig.app.heartBeatFrequency) * 1000);
     if (
-      this.systemInfo.systemData.ipcStatus == serverState.ERROR ||
-      this.systemInfo.systemData.ipcStatus == serverState.INIT
+      this.systemInfo.systemData.ipcInfo == serverState.ERROR ||
+      this.systemInfo.systemData.ipcInfo == serverState.INIT
     )
       return;
-    if (this.systemInfo.systemData.ipcStatus == serverState.READY) {
+    if (this.systemInfo.systemData.ipcInfo == serverState.READY) {
       this.plcCommunicationService.writeToPLC(
         ['ipcClock'],
         [!this.systemInfo.plcData.ipcClock],
@@ -432,11 +423,8 @@ export class SystemInfoService {
     ) {
       this.loadPlcConfig();
     }
-    if (this.systemInfo.plcData.ipcStatus === serverState.ERROR) {
-      this.plcCommunicationService.writeToPLC(
-        ['ipcStatus'],
-        [serverState.ERROR],
-      );
+    if (this.systemInfo.plcData.ipcInfo === serverState.ERROR) {
+      this.plcCommunicationService.writeToPLC(['ipcInfo'], [serverState.ERROR]);
     }
     if (this.systemInfo.plcData.fgUploadService) {
       this.plcCommunicationService.plcEvent.emit(
@@ -460,16 +448,16 @@ export class SystemInfoService {
       Logger.error(`[ ERROR LOG ] : ${JSON.stringify(err, null, 2)} `);
       return;
     }
-    this.systemInfo.systemData.ipcStatus = serverState.ERROR;
+    this.systemInfo.systemData.ipcInfo = serverState.ERROR;
   };
 
   private onIpcInit = () => {
-    this.systemInfo.systemData.ipcStatus = serverState.INIT;
-    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
+    this.systemInfo.systemData.ipcInfo = serverState.INIT;
+    this.plcCommunicationService.writeToPLC(['ipcInfo'], [serverState.INIT]);
   };
 
   private onIpcReady = () => {
-    this.systemInfo.systemData.ipcStatus = serverState.READY;
-    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.READY]);
+    this.systemInfo.systemData.ipcInfo = serverState.READY;
+    this.plcCommunicationService.writeToPLC(['ipcInfo'], [serverState.READY]);
   };
 }
