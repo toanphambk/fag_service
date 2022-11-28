@@ -164,6 +164,11 @@ export class SystemInfoService {
       ? conveyorState.RUNNING
       : conveyorState.STOP;
 
+    if (this.systemInfo.plcData.conveyorSpeed) {
+      this.encoderVal +=
+        this.systemInfo.plcData.conveyorSpeed /
+        (1000 / this.systemConfigService.systemConfig.app.encoderSampleRate);
+    }
     if (
       this.index ==
       10000 / this.systemConfigService.systemConfig.app.encoderSampleRate
@@ -304,6 +309,10 @@ export class SystemInfoService {
       clearInterval(this.serviceTimer.timer[param.name]);
       this.initServiceTimer(param.name, param.interval);
       this.systemInfo.systemData[serviceName] = serverState.READY;
+      this.plcCommunicationService.writeToPLC(
+        [param.name],
+        [serverState.READY],
+      );
       return param;
     } else {
       throw new HttpException(
@@ -319,6 +328,11 @@ export class SystemInfoService {
   private async initServiceTimer(serviceName: string, interval: number) {
     this.serviceTimer.timer[serviceName] = setInterval(async () => {
       this.systemInfo.systemData[serviceName] = serverState.ERROR;
+      await this.plcCommunicationService.writeToPLC(
+        [serviceName],
+        [serverState.ERROR],
+        false,
+      );
       this.plcCommunicationService.plcEvent.emit(
         'System_Error',
         'Flush and gap Upload Service Error',
@@ -408,18 +422,6 @@ export class SystemInfoService {
         );
         this.systemOnChange();
       }
-
-      for (const device in this.systemInfo.systemData) {
-        if (
-          this.systemInfo.systemData[device] != this.systemInfo.plcData[device]
-        ) {
-          this.plcCommunicationService.writeToPLC(
-            [device],
-            [this.systemInfo.systemData[device]],
-            true,
-          );
-        }
-      }
     }
   };
 
@@ -430,20 +432,25 @@ export class SystemInfoService {
     ) {
       this.loadPlcConfig();
     }
-    if (this.systemInfo.plcData.fgUploadService == serverState.ERROR) {
-      // this.plcCommunicationService.plcEvent.emit(
-      //   'System_Error',
-      //   'upload service not responding ',
-      //   true,
-      // );
+    if (this.systemInfo.plcData.ipcStatus === serverState.ERROR) {
+      this.plcCommunicationService.writeToPLC(
+        ['ipcStatus'],
+        [serverState.ERROR],
+      );
     }
-
-    if (this.systemInfo.plcData.eyeflowService == serverState.ERROR) {
-      // this.plcCommunicationService.plcEvent.emit(
-      //   'System_Error',
-      //   'eyeflow service not responding ',
-      //   false,
-      // );
+    if (this.systemInfo.plcData.fgUploadService) {
+      this.plcCommunicationService.plcEvent.emit(
+        'System_Error',
+        'upload service not responding ',
+        false,
+      );
+    }
+    if (this.systemInfo.plcData.eyeflowService) {
+      this.plcCommunicationService.plcEvent.emit(
+        'System_Error',
+        'eyeflow service not responding ',
+        false,
+      );
     }
   };
 
@@ -458,9 +465,11 @@ export class SystemInfoService {
 
   private onIpcInit = () => {
     this.systemInfo.systemData.ipcStatus = serverState.INIT;
+    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
   };
 
   private onIpcReady = () => {
     this.systemInfo.systemData.ipcStatus = serverState.READY;
+    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.READY]);
   };
 }
