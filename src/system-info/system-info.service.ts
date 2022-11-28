@@ -431,19 +431,19 @@ export class SystemInfoService {
       this.loadPlcConfig();
     }
     if (this.systemInfo.plcData.fgUploadService == serverState.ERROR) {
-      this.plcCommunicationService.plcEvent.emit(
-        'System_Error',
-        'upload service not responding ',
-        true,
-      );
+      // this.plcCommunicationService.plcEvent.emit(
+      //   'System_Error',
+      //   'upload service not responding ',
+      //   true,
+      // );
     }
 
     if (this.systemInfo.plcData.eyeflowService == serverState.ERROR) {
-      this.plcCommunicationService.plcEvent.emit(
-        'System_Error',
-        'eyeflow service not responding ',
-        false,
-      );
+      // this.plcCommunicationService.plcEvent.emit(
+      //   'System_Error',
+      //   'eyeflow service not responding ',
+      //   false,
+      // );
     }
   };
 
