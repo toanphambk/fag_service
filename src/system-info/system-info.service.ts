@@ -415,11 +415,12 @@ export class SystemInfoService {
       }
       for (const device in this.systemInfo.systemData) {
         if (
-          this.systemInfo.systemData[device] !== this.systemInfo.plcData[device]
+          this.systemInfo.systemData[device] != this.systemInfo.plcData[device]
         ) {
           this.plcCommunicationService.writeToPLC(
             [JSON.stringify(device)],
             [this.systemInfo[device]],
+            false,
           );
         }
       }
