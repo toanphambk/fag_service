@@ -422,7 +422,7 @@ export class SystemInfoService {
           console.log(this.systemInfo[device]);
           this.plcCommunicationService.writeToPLC(
             [JSON.stringify(device)],
-            [this.systemInfo[device]],
+            [this.systemInfo.systemData[device]],
             false,
           );
         }
