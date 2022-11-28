@@ -1,7 +1,7 @@
 import { BlobOptions } from 'buffer';
 
 export interface PlcData {
-  ipcInfo: serverState;
+  ipcStatus: serverState;
   eyeflowService: serverState;
   fgUploadService: serverState;
   plcStatus: plcState;
