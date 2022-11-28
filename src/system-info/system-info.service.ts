@@ -433,7 +433,7 @@ export class SystemInfoService {
     ) {
       this.loadPlcConfig();
     }
-    if (this.systemInfo.plcData.ipcStatus === serverState.ERROR) {
+    if (this.systemInfo.systemData.ipcStatus === serverState.ERROR) {
       this.plcCommunicationService.writeToPLC(
         ['ipcStatus'],
         [serverState.ERROR],
@@ -466,11 +466,9 @@ export class SystemInfoService {
 
   private onIpcInit = () => {
     this.systemInfo.systemData.ipcStatus = serverState.INIT;
-    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.INIT]);
   };
 
   private onIpcReady = () => {
     this.systemInfo.systemData.ipcStatus = serverState.READY;
-    this.plcCommunicationService.writeToPLC(['ipcStatus'], [serverState.READY]);
   };
 }
