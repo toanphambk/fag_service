@@ -34,7 +34,6 @@ export class SystemInfoController {
 
   @Post('serviceStat')
   uploadServiceStat(@Body() data) {
-    console.log(data);
     return this.systemInfoService.serviceCheck(data.serviceName);
   }
 

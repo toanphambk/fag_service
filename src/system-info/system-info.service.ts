@@ -333,6 +333,7 @@ export class SystemInfoService {
           false,
         );
       }
+      console.log('asdfasdfasdf');
     }, interval);
   }
 
