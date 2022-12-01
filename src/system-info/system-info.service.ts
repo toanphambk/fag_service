@@ -307,13 +307,13 @@ export class SystemInfoService {
     );
     if (param) {
       clearInterval(this.serviceTimer.timer[param.name]);
-      this.plcCommunicationService.writeToPLC(
-        [serviceName],
-        [serverState.ERROR],
-        false,
-      );
-
       this.initServiceTimer(param.name, param.interval);
+      if (this.systemInfo.systemData[param.name] !== serverState.READY)
+        this.plcCommunicationService.writeToPLC(
+          [serviceName],
+          [serverState.READY],
+          true,
+        );
       return param;
     } else {
       throw new HttpException(
@@ -333,11 +333,13 @@ export class SystemInfoService {
         this.systemInfo.systemData[serviceName] !==
         this.systemInfo.plcData[serviceName]
       ) {
-        this.plcCommunicationService.writeToPLC(
-          [serviceName],
-          [serverState.ERROR],
-          false,
-        );
+        if (this.systemInfo.systemData[serviceName] !== serverState.ERROR) {
+          this.plcCommunicationService.writeToPLC(
+            [serviceName],
+            [serverState.ERROR],
+            false,
+          );
+        }
       }
       console.log(`${serviceName} timeout`);
     }, interval);
