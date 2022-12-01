@@ -343,8 +343,6 @@ export class SystemInfoService {
           true,
         );
       }
-      console.log(`${serviceName} timeout`);
-      console.log(this.systemInfo);
     }, interval);
   }
 
