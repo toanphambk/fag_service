@@ -310,7 +310,7 @@ export class SystemInfoService {
       this.systemInfo.systemData[param.name] = serverState.READY;
       this.initServiceTimer(param.name, param.interval);
       if (
-        this.systemInfo.plcData[param.name] !==
+        this.systemInfo.systemData[param.name] !==
         this.systemInfo.plcData[param.name]
       )
         this.plcCommunicationService.writeToPLC(
@@ -346,6 +346,7 @@ export class SystemInfoService {
         }
       }
       console.log(`${serviceName} timeout`);
+      console.log(this.systemInfo);
     }, interval);
   }
 
