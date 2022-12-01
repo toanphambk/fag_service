@@ -307,8 +307,12 @@ export class SystemInfoService {
     );
     if (param) {
       clearInterval(this.serviceTimer.timer[param.name]);
+      this.systemInfo.systemData[param.name] = serverState.READY;
       this.initServiceTimer(param.name, param.interval);
-      if (this.systemInfo.systemData[param.name] !== serverState.READY)
+      if (
+        this.systemInfo.plcData[param.name] !==
+        this.systemInfo.plcData[param.name]
+      )
         this.plcCommunicationService.writeToPLC(
           [serviceName],
           [serverState.READY],
