@@ -337,13 +337,11 @@ export class SystemInfoService {
         this.systemInfo.systemData[serviceName] !==
         this.systemInfo.plcData[serviceName]
       ) {
-        if (this.systemInfo.systemData[serviceName] !== serverState.ERROR) {
-          this.plcCommunicationService.writeToPLC(
-            [serviceName],
-            [serverState.ERROR],
-            false,
-          );
-        }
+        this.plcCommunicationService.writeToPLC(
+          [serviceName],
+          [serverState.ERROR],
+          true,
+        );
       }
       console.log(`${serviceName} timeout`);
       console.log(this.systemInfo);
