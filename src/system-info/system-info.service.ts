@@ -307,6 +307,12 @@ export class SystemInfoService {
     );
     if (param) {
       clearInterval(this.serviceTimer.timer[param.name]);
+      this.plcCommunicationService.writeToPLC(
+        [serviceName],
+        [serverState.ERROR],
+        false,
+      );
+
       this.initServiceTimer(param.name, param.interval);
       return param;
     } else {
@@ -320,14 +326,14 @@ export class SystemInfoService {
     }
   }
 
-  private async initServiceTimer(serviceName: string, interval: number) {
-    this.serviceTimer.timer[serviceName] = setInterval(async () => {
+  private initServiceTimer(serviceName: string, interval: number) {
+    this.serviceTimer.timer[serviceName] = setInterval(() => {
       this.systemInfo.systemData[serviceName] = serverState.ERROR;
       if (
         this.systemInfo.systemData[serviceName] !==
         this.systemInfo.plcData[serviceName]
       ) {
-        await this.plcCommunicationService.writeToPLC(
+        this.plcCommunicationService.writeToPLC(
           [serviceName],
           [serverState.ERROR],
           false,
