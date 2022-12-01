@@ -333,7 +333,7 @@ export class SystemInfoService {
           false,
         );
       }
-      console.log('asdfasdfasdf');
+      console.log(`${serviceName} timeout`);
     }, interval);
   }
 
