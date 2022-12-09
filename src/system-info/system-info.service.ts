@@ -316,7 +316,7 @@ export class SystemInfoService {
         this.plcCommunicationService.writeToPLC(
           [serviceName],
           [serverState.READY],
-          true,
+          false,
         );
       return param;
     } else {
