@@ -110,7 +110,7 @@ export class PlcCommunicationService {
       let _config = {};
 
       for (let i = 0; i <= 20; i++) {
-        this.configBlock[`vehicleCode${i}`] = `DB14,C${4 * i}.4`;
+        this.configBlock[`vehicleCode${i}`] = `DB14,C${14 * i}.4`;
       }
 
       await this.addItem(this.configBlock);
