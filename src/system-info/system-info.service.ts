@@ -118,7 +118,7 @@ export class SystemInfoService {
 
       this.initSoftEncoder();
 
-      // this.softEncoderTranfer();
+      this.conveyorStateUpDate();
 
       this.ipcClockTrander();
     } catch (error) {
@@ -345,12 +345,6 @@ export class SystemInfoService {
 
   private carQueueUpdate = () => {
     this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
-    if (this.tempEncoder == this.hardEncoderData) {
-      this.conveyorState = conveyorState.STOP;
-    } else {
-      this.conveyorState = conveyorState.RUNNING;
-      this.tempEncoder = this.hardEncoderData;
-    }
     const b4Filter = this.carQueue.length;
     this.carQueue = this.carQueue.filter((e) => {
       return this.hardEncoderData - e.detectedPos < 8000;
@@ -362,24 +356,21 @@ export class SystemInfoService {
     }
   };
 
-  private softEncoderTranfer = () => {
+  private conveyorStateUpDate = () => {
     setTimeout(() => {
-      this.softEncoderTranfer();
-    }, this.systemConfigService.systemConfig.app.encoderTranferRate);
+      this.conveyorStateUpDate();
+    }, 1000);
     if (
       this.systemInfo.systemData.ipcStatus == serverState.ERROR ||
       this.systemInfo.systemData.ipcStatus == serverState.INIT
     )
       return;
-
-    if (Math.floor(this.encoderVal) == this.systemInfo.plcData.softEncoderValue)
-      return;
-
-    this.plcCommunicationService.writeToPLC(
-      ['softEncoderValue'],
-      [Math.floor(this.encoderVal)],
-      false,
-    );
+    if (this.tempEncoder == this.hardEncoderData) {
+      this.conveyorState = conveyorState.STOP;
+    } else {
+      this.conveyorState = conveyorState.RUNNING;
+      this.tempEncoder = this.hardEncoderData;
+    }
   };
 
   private ipcClockTrander = () => {
