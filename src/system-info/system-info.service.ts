@@ -160,12 +160,6 @@ export class SystemInfoService {
       this.systemConfigService.systemConfig.app.encoderSampleRate,
     );
     this.index++;
-    if (this.tempEncoder == this.hardEncoderData) {
-      this.conveyorState = conveyorState.STOP;
-    } else {
-      this.conveyorState = conveyorState.RUNNING;
-      this.tempEncoder = this.hardEncoderData;
-    }
 
     if (this.systemInfo.plcData.conveyorSpeed) {
       this.encoderVal +=
@@ -351,6 +345,12 @@ export class SystemInfoService {
 
   private carQueueUpdate = () => {
     this.hardEncoderData = this.systemInfo.plcData.plcEncoderValue;
+    if (this.tempEncoder == this.hardEncoderData) {
+      this.conveyorState = conveyorState.STOP;
+    } else {
+      this.conveyorState = conveyorState.RUNNING;
+      this.tempEncoder = this.hardEncoderData;
+    }
     const b4Filter = this.carQueue.length;
     this.carQueue = this.carQueue.filter((e) => {
       return this.hardEncoderData - e.detectedPos < 8000;
