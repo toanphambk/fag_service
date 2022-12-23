@@ -32,6 +32,7 @@ export class SystemInfoService {
   public encoderVal = 0;
   public plcConfig = [];
   public conveyorState: conveyorState = conveyorState.STOP;
+  private tempEncoder = 0;
   public systemInfo: SystemInfo = {
     systemData: {
       ipcStatus: serverState.INIT,
@@ -159,10 +160,12 @@ export class SystemInfoService {
       this.systemConfigService.systemConfig.app.encoderSampleRate,
     );
     this.index++;
-
-    this.conveyorState = this.systemInfo.plcData.conveyorSpeed
-      ? conveyorState.RUNNING
-      : conveyorState.STOP;
+    if (this.tempEncoder == this.hardEncoderData) {
+      this.conveyorState = conveyorState.STOP;
+    } else {
+      this.conveyorState = conveyorState.RUNNING;
+      this.tempEncoder = this.hardEncoderData;
+    }
 
     if (this.systemInfo.plcData.conveyorSpeed) {
       this.encoderVal +=
